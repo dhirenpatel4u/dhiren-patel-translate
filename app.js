@@ -3,22 +3,24 @@
 
 /*
  * =========================================================
- * Dhiren Translate
+ * DHIREN TRANSLATE
  * =========================================================
  *
  * Translation API:
  *
  * /api/?sl=en&tl=hi&q=Hello
  *
- * OCR:
+ * Image OCR:
  *
- * Camera / Image
- *       ↓
+ * Image
+ *   ↓
  * Tesseract.js
- *       ↓
- * Extracted text
- *       ↓
+ *   ↓
+ * Extract text
+ *   ↓
  * sourceText
+ *   ↓
+ * Translate
  *
  * =========================================================
  */
@@ -30,7 +32,7 @@ const API_URL = "/api/";
 
 /*
  * =========================================================
- * SUPPORTED LANGUAGES
+ * LANGUAGES
  * =========================================================
  */
 
@@ -172,85 +174,115 @@ const LANGUAGES = [
 
 /*
  * =========================================================
- * DOM ELEMENTS
+ * DOM
  * =========================================================
  */
 
 const sourceLanguage =
-    document.getElementById("sourceLanguage");
+    document.getElementById(
+        "sourceLanguage"
+    );
 
 
 const targetLanguage =
-    document.getElementById("targetLanguage");
+    document.getElementById(
+        "targetLanguage"
+    );
 
 
 const sourceText =
-    document.getElementById("sourceText");
+    document.getElementById(
+        "sourceText"
+    );
 
 
 const translationResult =
-    document.getElementById("translationResult");
+    document.getElementById(
+        "translationResult"
+    );
 
 
 const translateButton =
-    document.getElementById("translateButton");
+    document.getElementById(
+        "translateButton"
+    );
 
 
 const translateButtonText =
-    document.getElementById("translateButtonText");
+    document.getElementById(
+        "translateButtonText"
+    );
 
 
 const translateSpinner =
-    document.getElementById("translateSpinner");
+    document.getElementById(
+        "translateSpinner"
+    );
 
 
 const swapButton =
-    document.getElementById("swapButton");
+    document.getElementById(
+        "swapButton"
+    );
 
 
 const clearButton =
-    document.getElementById("clearButton");
+    document.getElementById(
+        "clearButton"
+    );
 
 
 const copyButton =
-    document.getElementById("copyButton");
+    document.getElementById(
+        "copyButton"
+    );
 
 
 const characterCount =
-    document.getElementById("characterCount");
+    document.getElementById(
+        "characterCount"
+    );
 
 
 const translationStatus =
-    document.getElementById("translationStatus");
+    document.getElementById(
+        "translationStatus"
+    );
 
 
 const errorMessage =
-    document.getElementById("errorMessage");
+    document.getElementById(
+        "errorMessage"
+    );
 
 
 const mobileMenuButton =
-    document.getElementById("mobileMenuButton");
+    document.getElementById(
+        "mobileMenuButton"
+    );
 
 
 const mobileNav =
-    document.getElementById("mobileNav");
+    document.getElementById(
+        "mobileNav"
+    );
 
 
 
 /*
- * OCR elements.
+ * OCR
  */
 
-const cameraInput =
-    document.getElementById("cameraInput");
-
-
 const imageInput =
-    document.getElementById("imageInput");
+    document.getElementById(
+        "imageInput"
+    );
 
 
 const ocrStatus =
-    document.getElementById("ocrStatus");
+    document.getElementById(
+        "ocrStatus"
+    );
 
 
 const ocrProgressContainer =
@@ -268,7 +300,7 @@ const ocrProgress =
 
 /*
  * =========================================================
- * LANGUAGE OPTIONS
+ * POPULATE LANGUAGES
  * =========================================================
  */
 
@@ -280,11 +312,13 @@ function populateLanguages() {
 
 
     /*
-     * Detect language option.
+     * Auto detection
      */
 
     const detectOption =
-        document.createElement("option");
+        document.createElement(
+            "option"
+        );
 
 
     detectOption.value =
@@ -301,12 +335,11 @@ function populateLanguages() {
 
 
     /*
-     * Add languages.
+     * Languages
      */
 
     LANGUAGES.forEach(
         ([code, name]) => {
-
 
             const sourceOption =
                 document.createElement(
@@ -325,7 +358,6 @@ function populateLanguages() {
             sourceLanguage.appendChild(
                 sourceOption
             );
-
 
 
             const targetOption =
@@ -378,7 +410,7 @@ function updateCharacterCount() {
 
 /*
  * =========================================================
- * ERRORS
+ * ERROR
  * =========================================================
  */
 
@@ -412,7 +444,7 @@ function hideError() {
 
 /*
  * =========================================================
- * TRANSLATION LOADING
+ * LOADING
  * =========================================================
  */
 
@@ -450,7 +482,7 @@ function setLoading(isLoading) {
 
 /*
  * =========================================================
- * TRANSLATION RESPONSE
+ * API RESULT
  * =========================================================
  */
 
@@ -462,7 +494,8 @@ function getTranslation(data) {
 
 
     if (
-        typeof data === "string"
+        typeof data ===
+        "string"
     ) {
 
         return data;
@@ -549,7 +582,6 @@ async function translate() {
 
     hideError();
 
-
     setLoading(true);
 
 
@@ -568,7 +600,7 @@ async function translate() {
 
 
         /*
-         * Same language.
+         * Same language
          */
 
         if (
@@ -595,7 +627,7 @@ async function translate() {
 
 
         /*
-         * API parameters.
+         * API parameters
          */
 
         const params =
@@ -621,7 +653,7 @@ async function translate() {
 
 
         /*
-         * API request.
+         * API request
          */
 
         const response =
@@ -712,15 +744,11 @@ async function translate() {
 
 /*
  * =========================================================
- * LANGUAGE SWAP
+ * SWAP
  * =========================================================
  */
 
 function swapLanguages() {
-
-    /*
-     * Cannot swap when source is Auto.
-     */
 
     if (
         sourceLanguage.value ===
@@ -747,10 +775,6 @@ function swapLanguages() {
     targetLanguage.value =
         oldSource;
 
-
-    /*
-     * Swap text and translation.
-     */
 
     if (
         sourceText.value.trim() &&
@@ -811,21 +835,18 @@ function clearTranslation() {
 
 
     /*
-     * Clear selected image files.
+     * Reset image input.
      */
 
-    if (cameraInput) {
-        cameraInput.value = "";
-    }
-
-
     if (imageInput) {
-        imageInput.value = "";
+
+        imageInput.value =
+            "";
+
     }
 
 
     hideOCRStatus();
-
 
     hideOCRProgress();
 
@@ -870,7 +891,7 @@ async function copyTranslation() {
 
 
         setTimeout(
-            () => {
+            function () {
 
                 if (
                     translationStatus.textContent ===
@@ -906,9 +927,6 @@ async function copyTranslation() {
  * =========================================================
  * OCR LANGUAGE MAP
  * =========================================================
- *
- * Translation language codes are not always
- * the same as Tesseract language codes.
  */
 
 const OCR_LANGUAGES = {
@@ -1007,21 +1025,18 @@ const OCR_LANGUAGES = {
 
 function getOCRLanguage() {
 
-    const selectedLanguage =
+    const language =
         sourceLanguage.value;
 
 
     /*
-     * When Detect Language is selected,
-     * use English + Hindi + Gujarati.
+     * Auto:
      *
-     * These are useful for common Indian
-     * multilingual images.
+     * English + Hindi + Gujarati
      */
 
     if (
-        selectedLanguage ===
-        "auto"
+        language === "auto"
     ) {
 
         return "eng+hin+guj";
@@ -1030,9 +1045,8 @@ function getOCRLanguage() {
 
 
     return (
-        OCR_LANGUAGES[
-            selectedLanguage
-        ] || "eng"
+        OCR_LANGUAGES[language] ||
+        "eng"
     );
 
 }
@@ -1151,7 +1165,7 @@ function hideOCRProgress() {
 
 /*
  * =========================================================
- * RUN OCR
+ * IMAGE OCR
  * =========================================================
  */
 
@@ -1163,12 +1177,14 @@ async function runOCR(file) {
 
 
     /*
-     * Make sure the selected file is an image.
+     * Validate image.
      */
 
     if (
         !file.type ||
-        !file.type.startsWith("image/")
+        !file.type.startsWith(
+            "image/"
+        )
     ) {
 
         showOCRStatus(
@@ -1182,7 +1198,7 @@ async function runOCR(file) {
 
 
     /*
-     * Make sure Tesseract loaded.
+     * Check Tesseract.
      */
 
     if (
@@ -1200,6 +1216,9 @@ async function runOCR(file) {
     }
 
 
+    let worker = null;
+
+
     try {
 
         showOCRProgress();
@@ -1211,7 +1230,7 @@ async function runOCR(file) {
 
 
         /*
-         * Get OCR language.
+         * Determine OCR language.
          */
 
         const language =
@@ -1219,10 +1238,10 @@ async function runOCR(file) {
 
 
         /*
-         * Create OCR worker.
+         * Create Tesseract worker.
          */
 
-        const worker =
+        worker =
             await Tesseract.createWorker(
                 language,
                 1,
@@ -1232,7 +1251,7 @@ async function runOCR(file) {
                         function (message) {
 
                             /*
-                             * Progress.
+                             * Progress
                              */
 
                             if (
@@ -1249,7 +1268,7 @@ async function runOCR(file) {
 
 
                             /*
-                             * Status.
+                             * Status
                              */
 
                             if (
@@ -1269,12 +1288,12 @@ async function runOCR(file) {
 
 
         showOCRStatus(
-            "🔎 Reading text from image…"
+            "🔎 Extracting text…"
         );
 
 
         /*
-         * OCR.
+         * OCR image.
          */
 
         const result =
@@ -1284,14 +1303,7 @@ async function runOCR(file) {
 
 
         /*
-         * Close worker.
-         */
-
-        await worker.terminate();
-
-
-        /*
-         * Extract text.
+         * Get extracted text.
          */
 
         const extractedText =
@@ -1299,7 +1311,16 @@ async function runOCR(file) {
 
 
         /*
-         * No text.
+         * Terminate worker.
+         */
+
+        await worker.terminate();
+
+        worker = null;
+
+
+        /*
+         * No text found.
          */
 
         if (!extractedText) {
@@ -1308,7 +1329,7 @@ async function runOCR(file) {
 
 
             showOCRStatus(
-                "⚠️ No text was found in this image."
+                "⚠️ No text found in this image."
             );
 
 
@@ -1318,8 +1339,8 @@ async function runOCR(file) {
 
 
         /*
-         * Put OCR result into
-         * the existing translation input.
+         * PUT OCR TEXT DIRECTLY
+         * INTO TRANSLATION INPUT.
          */
 
         sourceText.value =
@@ -1351,14 +1372,14 @@ async function runOCR(file) {
 
 
         /*
-         * Clear previous errors.
+         * Clear errors.
          */
 
         hideError();
 
 
         /*
-         * Finish.
+         * Finish progress.
          */
 
         setOCRProgress(100);
@@ -1370,14 +1391,14 @@ async function runOCR(file) {
 
 
         /*
-         * Focus source text.
+         * Focus input.
          */
 
         sourceText.focus();
 
 
         /*
-         * Hide OCR status after 2 seconds.
+         * Hide OCR message.
          */
 
         setTimeout(
@@ -1400,6 +1421,29 @@ async function runOCR(file) {
         );
 
 
+        /*
+         * Clean up worker.
+         */
+
+        if (worker) {
+
+            try {
+
+                await worker.terminate();
+
+            } catch (
+                terminateError
+            ) {
+
+                console.error(
+                    terminateError
+                );
+
+            }
+
+        }
+
+
         hideOCRProgress();
 
 
@@ -1415,45 +1459,7 @@ async function runOCR(file) {
 
 /*
  * =========================================================
- * CAMERA EVENT
- * =========================================================
- */
-
-if (cameraInput) {
-
-    cameraInput.addEventListener(
-        "change",
-        function () {
-
-            if (
-                this.files &&
-                this.files.length > 0
-            ) {
-
-                runOCR(
-                    this.files[0]
-                );
-
-            }
-
-
-            /*
-             * Allow the same image
-             * to be selected again.
-             */
-
-            this.value = "";
-
-        }
-    );
-
-}
-
-
-
-/*
- * =========================================================
- * IMAGE / GALLERY EVENT
+ * IMAGE INPUT EVENT
  * =========================================================
  */
 
@@ -1476,11 +1482,14 @@ if (imageInput) {
 
 
             /*
-             * Allow same image
-             * to be selected again.
+             * Reset input.
+             *
+             * This allows the user to select
+             * the same image again.
              */
 
-            this.value = "";
+            this.value =
+                "";
 
         }
     );
@@ -1501,12 +1510,10 @@ sourceText.addEventListener(
 );
 
 
-
 translateButton.addEventListener(
     "click",
     translate
 );
-
 
 
 swapButton.addEventListener(
@@ -1515,12 +1522,10 @@ swapButton.addEventListener(
 );
 
 
-
 clearButton.addEventListener(
     "click",
     clearTranslation
 );
-
 
 
 copyButton.addEventListener(
@@ -1556,7 +1561,7 @@ sourceText.addEventListener(
 
 
 /*
- * Target language change.
+ * Target language change
  */
 
 targetLanguage.addEventListener(
@@ -1577,7 +1582,7 @@ targetLanguage.addEventListener(
 
 
 /*
- * Source language change.
+ * Source language change
  */
 
 sourceLanguage.addEventListener(
