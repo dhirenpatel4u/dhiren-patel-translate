@@ -1207,7 +1207,7 @@ textarea::placeholder {
 }
 
 /* =========================================================
-   OCR
+   IMAGE OCR
    ========================================================= */
 
 .source-box {
@@ -1224,14 +1224,9 @@ textarea::placeholder {
 }
 
 
-.source-footer-right {
-    display: flex;
-
-    align-items: center;
-
-    gap: 5px;
-}
-
+/*
+ * Image OCR button
+ */
 
 .ocr-button {
     height: 36px;
@@ -1245,7 +1240,7 @@ textarea::placeholder {
     gap: 6px;
 
     padding:
-        0 10px;
+        0 11px;
 
     border:
         1px solid var(--border);
@@ -1299,9 +1294,10 @@ textarea::placeholder {
 }
 
 
-/* =========================================================
-   OCR STATUS
-   ========================================================= */
+
+/*
+ * OCR status
+ */
 
 .ocr-status {
     position: absolute;
@@ -1333,9 +1329,10 @@ textarea::placeholder {
 }
 
 
-/* =========================================================
-   OCR PROGRESS
-   ========================================================= */
+
+/*
+ * OCR progress
+ */
 
 .ocr-progress-container {
     position: absolute;
@@ -1377,9 +1374,24 @@ textarea::placeholder {
 }
 
 
-/* =========================================================
-   MOBILE OCR
-   ========================================================= */
+
+/*
+ * Source footer
+ */
+
+.source-footer-right {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+
+/*
+ * Mobile
+ */
 
 @media (max-width: 560px) {
 
@@ -1392,7 +1404,7 @@ textarea::placeholder {
         height: 34px;
 
         padding:
-            0 8px;
+            0 9px;
 
         font-size: 11px;
     }
@@ -1426,4 +1438,5 @@ textarea::placeholder {
     }
 
 }
+
 
