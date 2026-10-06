@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -14,67 +17,145 @@
         content="Translate text between supported languages using Dhiren Translate."
     >
 
-    <link rel="stylesheet" href="/styles.css">
+    <link
+        rel="stylesheet"
+        href="/styles.css"
+    >
+
 </head>
+
 
 <body>
 
+
 <header class="site-header">
+
     <div class="header-inner">
 
-        <a href="/" class="brand">
-            <span class="brand-icon">文</span>
-            <span>Dhiren Translate</span>
+        <a
+            href="/"
+            class="brand"
+        >
+
+            <span class="brand-icon">
+                文
+            </span>
+
+            <span>
+                Dhiren Translate
+            </span>
+
         </a>
 
+
         <nav class="main-nav">
-            <a href="/" class="nav-link active">Translate</a>
-            <a href="/api-docs" class="nav-link">API Docs</a>
-            <a href="/excel-addin" class="nav-link">Excel Add-in</a>
+
+            <a
+                href="/"
+                class="nav-link active"
+            >
+                Translate
+            </a>
+
+            <a
+                href="/api-docs"
+                class="nav-link"
+            >
+                API Docs
+            </a>
+
+            <a
+                href="/excel-addin"
+                class="nav-link"
+            >
+                Excel Add-in
+            </a>
+
         </nav>
+
 
         <button
             class="mobile-menu-button"
             id="mobileMenuButton"
             aria-label="Open menu"
+            type="button"
         >
             ☰
         </button>
 
     </div>
 
-    <div class="mobile-nav" id="mobileNav">
-        <a href="/">Translate</a>
-        <a href="/api-docs">API Docs</a>
-        <a href="/excel-addin">Excel Add-in</a>
+
+    <div
+        class="mobile-nav"
+        id="mobileNav"
+    >
+
+        <a href="/">
+            Translate
+        </a>
+
+        <a href="/api-docs">
+            API Docs
+        </a>
+
+        <a href="/excel-addin">
+            Excel Add-in
+        </a>
+
     </div>
+
 </header>
+
 
 
 <main class="translator-page">
 
+
+    <!-- HERO -->
+
     <section class="hero">
 
         <div class="hero-badge">
+
             <span></span>
+
             Free online translator
+
         </div>
 
+
         <h1>
+
             Translate text<br>
-            <span>quickly and easily.</span>
+
+            <span>
+                quickly and easily.
+            </span>
+
         </h1>
 
+
         <p>
-            Translate between languages using the Dhiren Translate API.
+
+            Translate between languages using
+            the Dhiren Translate API.
+
         </p>
 
     </section>
 
 
+
+    <!-- TRANSLATOR -->
+
     <section class="translator-card">
 
+
+        <!-- LANGUAGE BAR -->
+
         <div class="language-bar">
+
 
             <div class="language-side">
 
@@ -93,12 +174,15 @@
                 class="swap-button"
                 title="Swap languages"
                 aria-label="Swap languages"
+                type="button"
             >
                 ⇄
             </button>
 
 
-            <div class="language-side target-language-side">
+            <div
+                class="language-side target-language-side"
+            >
 
                 <select
                     id="targetLanguage"
@@ -109,41 +193,162 @@
 
             </div>
 
+
         </div>
 
 
+
+        <!-- TRANSLATION AREA -->
+
         <div class="translation-area">
 
-            <div class="translation-box source-box">
+
+            <!-- SOURCE -->
+
+            <div
+                class="translation-box source-box"
+            >
+
 
                 <textarea
                     id="sourceText"
                     placeholder="Enter text"
                     maxlength="5000"
                     spellcheck="true"
+                    aria-label="Text to translate"
                 ></textarea>
+
+
+
+                <!-- OCR STATUS -->
+
+                <div
+                    id="ocrStatus"
+                    class="ocr-status hidden"
+                    role="status"
+                    aria-live="polite"
+                ></div>
+
+
+                <!-- OCR PROGRESS -->
+
+                <div
+                    id="ocrProgressContainer"
+                    class="ocr-progress-container hidden"
+                    aria-hidden="true"
+                >
+
+                    <div
+                        id="ocrProgress"
+                        class="ocr-progress"
+                    ></div>
+
+                </div>
+
+
+
+                <!-- SOURCE FOOTER -->
 
                 <div class="box-footer">
 
-                    <span id="characterCount">
-                        0 / 5000
-                    </span>
 
-                    <button
-                        id="clearButton"
-                        class="icon-button"
-                        title="Clear"
-                        aria-label="Clear"
-                    >
-                        ×
-                    </button>
+                    <div class="source-tools">
+
+
+                        <!-- CAMERA -->
+
+                        <label
+                            for="cameraInput"
+                            class="ocr-button"
+                            title="Scan text using camera"
+                        >
+
+                            <span class="ocr-icon">
+                                📷
+                            </span>
+
+                            <span class="ocr-label">
+                                Camera
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            id="cameraInput"
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            hidden
+                        >
+
+
+
+                        <!-- IMAGE -->
+
+                        <label
+                            for="imageInput"
+                            class="ocr-button"
+                            title="Extract text from image"
+                        >
+
+                            <span class="ocr-icon">
+                                🖼️
+                            </span>
+
+                            <span class="ocr-label">
+                                Image
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            id="imageInput"
+                            type="file"
+                            accept="image/*"
+                            hidden
+                        >
+
+
+                    </div>
+
+
+                    <div class="source-footer-right">
+
+
+                        <span id="characterCount">
+                            0 / 5000
+                        </span>
+
+
+                        <button
+                            id="clearButton"
+                            class="icon-button"
+                            title="Clear"
+                            aria-label="Clear"
+                            type="button"
+                        >
+                            ×
+                        </button>
+
+
+                    </div>
+
 
                 </div>
+
 
             </div>
 
 
-            <div class="translation-box result-box">
+
+            <!-- RESULT -->
+
+            <div
+                class="translation-box result-box"
+            >
+
 
                 <div
                     id="translationResult"
@@ -152,54 +357,80 @@
                     Translation
                 </div>
 
+
                 <div class="box-footer">
 
-                    <span id="translationStatus"></span>
+
+                    <span id="translationStatus">
+                    </span>
+
 
                     <button
                         id="copyButton"
                         class="icon-button copy-button"
                         title="Copy translation"
                         aria-label="Copy translation"
+                        type="button"
                     >
                         ⧉
                     </button>
 
+
                 </div>
 
+
             </div>
+
 
         </div>
 
 
+
+        <!-- TRANSLATE BUTTON -->
+
         <div class="translator-actions">
+
 
             <button
                 id="translateButton"
                 class="translate-button"
+                type="button"
             >
+
                 <span id="translateButtonText">
                     Translate
                 </span>
+
 
                 <span
                     id="translateSpinner"
                     class="spinner hidden"
                 ></span>
+
+
             </button>
+
 
         </div>
 
+
+
+        <!-- ERROR -->
 
         <div
             id="errorMessage"
             class="error-message hidden"
         ></div>
 
+
     </section>
 
 
+
+    <!-- FEATURES -->
+
     <section class="features">
+
 
         <div class="feature-card">
 
@@ -207,14 +438,18 @@
                 ⚡
             </div>
 
-            <h3>Fast translation</h3>
+            <h3>
+                Fast translation
+            </h3>
 
             <p>
-                Send your text directly to the Dhiren Translate API
-                and get the result quickly.
+                Send your text directly to the
+                Dhiren Translate API and get the
+                result quickly.
             </p>
 
         </div>
+
 
 
         <div class="feature-card">
@@ -223,53 +458,93 @@
                 🌎
             </div>
 
-            <h3>Many languages</h3>
+            <h3>
+                Many languages
+            </h3>
 
             <p>
-                Select from a large collection of supported languages.
+                Select from a large collection
+                of supported languages.
             </p>
 
         </div>
+
 
 
         <div class="feature-card">
 
             <div class="feature-icon">
-                🔌
+                📷
             </div>
 
-            <h3>Developer API</h3>
+            <h3>
+                Image OCR
+            </h3>
 
             <p>
-                Use the same translation service from your own applications.
+                Take a photo or choose an image
+                and automatically extract text
+                into the translation box.
             </p>
 
         </div>
 
+
     </section>
 
+
 </main>
+
 
 
 <footer class="site-footer">
 
     <div class="footer-inner">
 
+
         <div>
-            © <span id="year"></span> Dhiren Translate
+
+            ©
+            <span id="year"></span>
+            Dhiren Translate
+
         </div>
 
+
         <div class="footer-links">
-            <a href="/api-docs">API Docs</a>
-            <a href="/excel-addin">Excel Add-in</a>
+
+            <a href="/api-docs">
+                API Docs
+            </a>
+
+            <a href="/excel-addin">
+                Excel Add-in
+            </a>
+
         </div>
+
 
     </div>
 
 </footer>
 
 
+
+<!--
+    Tesseract.js OCR
+
+    OCR runs directly in the browser.
+    No OCR API key is required.
+-->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"
+></script>
+
+
 <script src="/app.js"></script>
 
+
 </body>
+
 </html>
