@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Excel Add-in - Dhiren Translate</title>
+
+    <meta
+        name="description"
+        content="Dhiren Translate Excel Add-in."
+    >
+
+    <link rel="stylesheet" href="/styles.css">
+
+</head>
+
+
+<body>
+
+<header class="site-header">
+
+    <div class="header-inner">
+
+        <a href="/" class="brand">
+
+            <span class="brand-icon">文</span>
+
+            <span>Dhiren Translate</span>
+
+        </a>
+
+
+        <nav class="main-nav">
+
+            <a href="/" class="nav-link">
+                Translate
+            </a>
+
+            <a href="/api-docs" class="nav-link">
+                API Docs
+            </a>
+
+            <a
+                href="/excel-addin"
+                class="nav-link active"
+            >
+                Excel Add-in
+            </a>
+
+        </nav>
+
+
+        <button
+            class="mobile-menu-button"
+            id="mobileMenuButton"
+            aria-label="Open menu"
+        >
+            ☰
+        </button>
+
+    </div>
+
+
+    <div
+        class="mobile-nav"
+        id="mobileNav"
+    >
+
+        <a href="/">Translate</a>
+
+        <a href="/api-docs">API Docs</a>
+
+        <a href="/excel-addin">Excel Add-in</a>
+
+    </div>
+
+</header>
+
+
+<main class="docs-page">
+
+    <section class="docs-header">
+
+        <div class="hero-badge">
+            <span></span>
+            Microsoft Excel
+        </div>
+
+        <h1>
+            Translate directly from Excel
+        </h1>
+
+        <p>
+            Use Dhiren Translate inside Microsoft Excel
+            to translate cells without manually copying
+            text into the website.
+        </p>
+
+        <p>
+            <a
+                href="/downloads/DhirenTranslate.xml"
+                class="download-button"
+                download
+            >
+                ↓ Download Excel Add-in
+            </a>
+        </p>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>What is the Excel Add-in?</h2>
+
+        <p>
+            The Dhiren Translate Excel Add-in provides a simple
+            interface inside Excel for translating text using
+            your existing Dhiren Translate API.
+        </p>
+
+        <p>
+            Your translation API remains the same. The Excel
+            Add-in simply sends translation requests to:
+        </p>
+
+        <div class="endpoint">
+            /api/
+        </div>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Features</h2>
+
+        <ul>
+
+            <li>
+                Translate text directly from Excel.
+            </li>
+
+            <li>
+                Select source and target languages.
+            </li>
+
+            <li>
+                Use the same Dhiren Translate API.
+            </li>
+
+            <li>
+                No changes to your existing Python API.
+            </li>
+
+            <li>
+                Works with Excel on supported Microsoft 365
+                installations.
+            </li>
+
+        </ul>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Installation</h2>
+
+        <ol class="step-list">
+
+            <li>
+                Download the
+                <strong>DhirenTranslate.xml</strong>
+                manifest using the download button above.
+            </li>
+
+            <li>
+                Open Microsoft Excel.
+            </li>
+
+            <li>
+                Open the Excel Add-ins / Office Add-ins
+                management area.
+            </li>
+
+            <li>
+                Select the option to upload or install
+                an add-in from a manifest file if available
+                in your Excel version.
+            </li>
+
+            <li>
+                Select
+                <strong>DhirenTranslate.xml</strong>.
+            </li>
+
+            <li>
+                Install or add the Dhiren Translate add-in.
+            </li>
+
+            <li>
+                Open the Dhiren Translate task pane from
+                Excel.
+            </li>
+
+        </ol>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>How to use it</h2>
+
+        <ol class="step-list">
+
+            <li>
+                Open your Excel workbook.
+            </li>
+
+            <li>
+                Open the Dhiren Translate Add-in.
+            </li>
+
+            <li>
+                Select the source language.
+            </li>
+
+            <li>
+                Select the target language.
+            </li>
+
+            <li>
+                Enter text or select a cell.
+            </li>
+
+            <li>
+                Click Translate.
+            </li>
+
+            <li>
+                The translated text can then be inserted
+                into your workbook.
+            </li>
+
+        </ol>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Example</h2>
+
+        <table class="info-table">
+
+            <thead>
+
+                <tr>
+                    <th>Cell</th>
+                    <th>English</th>
+                    <th>Hindi</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td>A1</td>
+                    <td>Hello world</td>
+                    <td>नमस्ते दुनिया</td>
+                </tr>
+
+                <tr>
+                    <td>A2</td>
+                    <td>Good morning</td>
+                    <td>सुप्रभात</td>
+                </tr>
+
+                <tr>
+                    <td>A3</td>
+                    <td>How are you?</td>
+                    <td>आप कैसे हैं?</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>API connection</h2>
+
+        <p>
+            The add-in communicates with the same API used
+            by the website:
+        </p>
+
+        <div class="code-block">
+
+<pre>GET /api/?sl=en&amp;tl=hi&amp;q=Hello%20world</pre>
+
+        </div>
+
+        <p>
+            This means there is no second translation backend
+            to maintain.
+        </p>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Need help?</h2>
+
+        <p>
+            Check the
+            <a href="/api-docs">
+                API documentation
+            </a>
+            for the translation API.
+        </p>
+
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-inner">
+
+        <div>
+            © <span id="year"></span> Dhiren Translate
+        </div>
+
+        <div class="footer-links">
+
+            <a href="/">
+                Translate
+            </a>
+
+            <a href="/api-docs">
+                API Docs
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+
+const button =
+    document.getElementById("mobileMenuButton");
+
+const nav =
+    document.getElementById("mobileNav");
+
+
+button.addEventListener(
+    "click",
+    function () {
+        nav.classList.toggle("open");
+    }
+);
+
+</script>
+
+</body>
+
+</html>
