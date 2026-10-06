@@ -12,6 +12,11 @@
 
     <title>Dhiren Translate</title>
 
+    <!-- Microsoft Office JavaScript API -->
+    <script
+        src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js">
+    </script>
+
     <style>
 
         * {
@@ -20,7 +25,6 @@
 
         body {
             margin: 0;
-
             padding: 20px;
 
             font-family:
@@ -31,22 +35,17 @@
                 sans-serif;
 
             color: #202124;
-
             background: #ffffff;
         }
 
         h2 {
-            margin:
-                0 0 5px;
-
+            margin: 0 0 5px;
             font-size: 21px;
         }
 
         .subtitle {
             color: #5f6368;
-
             font-size: 13px;
-
             margin-bottom: 20px;
         }
 
@@ -54,11 +53,9 @@
             display: block;
 
             font-size: 12px;
-
             font-weight: 600;
 
-            margin:
-                14px 0 6px;
+            margin: 14px 0 6px;
         }
 
         select,
@@ -69,8 +66,7 @@
 
         select,
         textarea {
-            border:
-                1px solid #dadce0;
+            border: 1px solid #dadce0;
 
             border-radius: 7px;
 
@@ -90,12 +86,11 @@
 
         textarea {
             min-height: 120px;
-
             resize: vertical;
         }
 
         button {
-            margin-top: 14px;
+            margin-top: 10px;
 
             border: 0;
 
@@ -118,8 +113,15 @@
 
         button:disabled {
             opacity: 0.6;
-
             cursor: wait;
+        }
+
+        .secondary {
+            background: #5f6368;
+        }
+
+        .secondary:hover {
+            background: #3c4043;
         }
 
         .result {
@@ -131,8 +133,7 @@
 
             background: #f8f9fa;
 
-            border:
-                1px solid #e8eaed;
+            border: 1px solid #e8eaed;
 
             border-radius: 7px;
 
@@ -141,6 +142,8 @@
             line-height: 1.5;
 
             white-space: pre-wrap;
+
+            word-break: break-word;
         }
 
         .status {
@@ -155,6 +158,24 @@
             color: #d93025;
         }
 
+        .success {
+            color: #188038;
+        }
+
+        .excel-info {
+            margin-top: 10px;
+
+            padding: 8px;
+
+            background: #f1f3f4;
+
+            border-radius: 6px;
+
+            font-size: 11px;
+
+            color: #5f6368;
+        }
+
     </style>
 
 </head>
@@ -162,145 +183,189 @@
 
 <body>
 
-<h2>Dhiren Translate</h2>
+    <h2>Dhiren Translate</h2>
 
-<div class="subtitle">
-    Translate text using your Dhiren Translate API.
-</div>
-
-
-<label for="sourceLanguage">
-    From
-</label>
-
-<select id="sourceLanguage">
-
-    <option value="auto">
-        Detect language
-    </option>
-
-    <option value="en">
-        English
-    </option>
-
-    <option value="hi">
-        Hindi
-    </option>
-
-    <option value="gu">
-        Gujarati
-    </option>
-
-    <option value="mr">
-        Marathi
-    </option>
-
-    <option value="bn">
-        Bengali
-    </option>
-
-    <option value="ta">
-        Tamil
-    </option>
-
-    <option value="te">
-        Telugu
-    </option>
-
-    <option value="de">
-        German
-    </option>
-
-    <option value="fr">
-        French
-    </option>
-
-    <option value="es">
-        Spanish
-    </option>
-
-</select>
+    <div class="subtitle">
+        Translate text using your Dhiren Translate API.
+    </div>
 
 
-<label for="targetLanguage">
-    To
-</label>
+    <!-- SOURCE LANGUAGE -->
 
-<select id="targetLanguage">
+    <label for="sourceLanguage">
+        From
+    </label>
 
-    <option value="en">
-        English
-    </option>
+    <select id="sourceLanguage">
 
-    <option value="hi">
-        Hindi
-    </option>
+        <option value="auto">
+            Detect language
+        </option>
 
-    <option value="gu">
-        Gujarati
-    </option>
+        <option value="en">
+            English
+        </option>
 
-    <option value="mr">
-        Marathi
-    </option>
+        <option value="hi">
+            Hindi
+        </option>
 
-    <option value="bn">
-        Bengali
-    </option>
+        <option value="gu">
+            Gujarati
+        </option>
 
-    <option value="ta">
-        Tamil
-    </option>
+        <option value="mr">
+            Marathi
+        </option>
 
-    <option value="te">
-        Telugu
-    </option>
+        <option value="bn">
+            Bengali
+        </option>
 
-    <option value="de">
-        German
-    </option>
+        <option value="ta">
+            Tamil
+        </option>
 
-    <option value="fr">
-        French
-    </option>
+        <option value="te">
+            Telugu
+        </option>
 
-    <option value="es">
-        Spanish
-    </option>
+        <option value="de">
+            German
+        </option>
 
-</select>
+        <option value="fr">
+            French
+        </option>
 
+        <option value="es">
+            Spanish
+        </option>
 
-<label for="sourceText">
-    Text
-</label>
-
-<textarea
-    id="sourceText"
-    placeholder="Enter text to translate..."
-></textarea>
+    </select>
 
 
-<button id="translateButton">
-    Translate
-</button>
+    <!-- TARGET LANGUAGE -->
+
+    <label for="targetLanguage">
+        To
+    </label>
+
+    <select id="targetLanguage">
+
+        <option value="en">
+            English
+        </option>
+
+        <option value="hi">
+            Hindi
+        </option>
+
+        <option value="gu">
+            Gujarati
+        </option>
+
+        <option value="mr">
+            Marathi
+        </option>
+
+        <option value="bn">
+            Bengali
+        </option>
+
+        <option value="ta">
+            Tamil
+        </option>
+
+        <option value="te">
+            Telugu
+        </option>
+
+        <option value="de">
+            German
+        </option>
+
+        <option value="fr">
+            French
+        </option>
+
+        <option value="es">
+            Spanish
+        </option>
+
+    </select>
 
 
-<div
-    id="result"
-    class="result"
->
-    Translation will appear here.
-</div>
+    <!-- SOURCE TEXT -->
+
+    <label for="sourceText">
+        Text
+    </label>
+
+    <textarea
+        id="sourceText"
+        placeholder="Enter text to translate..."
+    ></textarea>
 
 
-<div
-    id="status"
-    class="status"
-></div>
+    <!-- GET EXCEL SELECTION -->
+
+    <button
+        id="getSelectionButton"
+        class="secondary"
+    >
+        Get Selected Excel Cells
+    </button>
 
 
-<script src="./taskpane.js"></script>
+    <div
+        id="excelInfo"
+        class="excel-info"
+    >
+        No Excel range selected.
+    </div>
+
+
+    <!-- TRANSLATE -->
+
+    <button
+        id="translateButton"
+    >
+        Translate
+    </button>
+
+
+    <!-- RESULT -->
+
+    <div
+        id="result"
+        class="result"
+    >
+        Translation will appear here.
+    </div>
+
+
+    <!-- WRITE BACK TO EXCEL -->
+
+    <button
+        id="writeExcelButton"
+        class="secondary"
+    >
+        Write Translation to Excel
+    </button>
+
+
+    <!-- STATUS -->
+
+    <div
+        id="status"
+        class="status"
+    ></div>
+
+
+    <!-- YOUR JAVASCRIPT -->
+
+    <script src="./taskpane.js"></script>
 
 </body>
 
