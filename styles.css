@@ -1205,3 +1205,225 @@ textarea::placeholder {
     }
 
 }
+
+/* =========================================================
+   OCR
+   ========================================================= */
+
+.source-box {
+    position: relative;
+}
+
+
+.source-tools {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.source-footer-right {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+}
+
+
+.ocr-button {
+    height: 36px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    padding:
+        0 10px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius: 8px;
+
+    background: var(--white);
+
+    color: var(--muted);
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.ocr-button:hover {
+    background: #f8f9fa;
+
+    color: var(--primary);
+
+    border-color: #c7d2e3;
+
+    box-shadow:
+        0 1px 4px
+        rgba(60, 64, 67, 0.12);
+}
+
+
+.ocr-button:active {
+    transform: scale(0.98);
+}
+
+
+.ocr-icon {
+    font-size: 15px;
+
+    line-height: 1;
+}
+
+
+/* =========================================================
+   OCR STATUS
+   ========================================================= */
+
+.ocr-status {
+    position: absolute;
+
+    left: 18px;
+
+    right: 18px;
+
+    bottom: 55px;
+
+    z-index: 5;
+
+    padding:
+        9px 12px;
+
+    border-radius: 8px;
+
+    background: #e8f0fe;
+
+    color: #185abc;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+
+    box-shadow:
+        0 2px 8px
+        rgba(60, 64, 67, 0.12);
+}
+
+
+/* =========================================================
+   OCR PROGRESS
+   ========================================================= */
+
+.ocr-progress-container {
+    position: absolute;
+
+    left: 18px;
+
+    right: 18px;
+
+    bottom: 48px;
+
+    height: 4px;
+
+    z-index: 6;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #e8eaed;
+}
+
+
+.ocr-progress {
+    width: 0%;
+
+    height: 100%;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #4285f4,
+            #1a73e8
+        );
+
+    transition:
+        width 0.2s ease;
+}
+
+
+/* =========================================================
+   MOBILE OCR
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+    .source-tools {
+        gap: 5px;
+    }
+
+
+    .ocr-button {
+        height: 34px;
+
+        padding:
+            0 8px;
+
+        font-size: 11px;
+    }
+
+
+    .ocr-icon {
+        font-size: 14px;
+    }
+
+
+    .ocr-status {
+        left: 14px;
+
+        right: 14px;
+
+        bottom: 52px;
+    }
+
+
+    .ocr-progress-container {
+        left: 14px;
+
+        right: 14px;
+
+        bottom: 45px;
+    }
+
+
+    .source-footer-right {
+        gap: 2px;
+    }
+
+}
+
