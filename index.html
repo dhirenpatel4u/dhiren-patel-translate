@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Dhiren Translate</title>
+
+    <meta
+        name="description"
+        content="Translate text between supported languages using Dhiren Translate."
+    >
+
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+
+        <a href="/" class="brand">
+            <span class="brand-icon">文</span>
+            <span>Dhiren Translate</span>
+        </a>
+
+        <nav class="main-nav">
+            <a href="/" class="nav-link active">Translate</a>
+            <a href="/api-docs" class="nav-link">API Docs</a>
+            <a href="/excel-addin" class="nav-link">Excel Add-in</a>
+        </nav>
+
+        <button
+            class="mobile-menu-button"
+            id="mobileMenuButton"
+            aria-label="Open menu"
+        >
+            ☰
+        </button>
+
+    </div>
+
+    <div class="mobile-nav" id="mobileNav">
+        <a href="/">Translate</a>
+        <a href="/api-docs">API Docs</a>
+        <a href="/excel-addin">Excel Add-in</a>
+    </div>
+</header>
+
+
+<main class="translator-page">
+
+    <section class="hero">
+
+        <div class="hero-badge">
+            <span></span>
+            Free online translator
+        </div>
+
+        <h1>
+            Translate text<br>
+            <span>quickly and easily.</span>
+        </h1>
+
+        <p>
+            Translate between languages using the Dhiren Translate API.
+        </p>
+
+    </section>
+
+
+    <section class="translator-card">
+
+        <div class="language-bar">
+
+            <div class="language-side">
+
+                <select
+                    id="sourceLanguage"
+                    class="language-select"
+                    aria-label="Source language"
+                >
+                </select>
+
+            </div>
+
+
+            <button
+                id="swapButton"
+                class="swap-button"
+                title="Swap languages"
+                aria-label="Swap languages"
+            >
+                ⇄
+            </button>
+
+
+            <div class="language-side target-language-side">
+
+                <select
+                    id="targetLanguage"
+                    class="language-select"
+                    aria-label="Target language"
+                >
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="translation-area">
+
+            <div class="translation-box source-box">
+
+                <textarea
+                    id="sourceText"
+                    placeholder="Enter text"
+                    maxlength="5000"
+                    spellcheck="true"
+                ></textarea>
+
+                <div class="box-footer">
+
+                    <span id="characterCount">
+                        0 / 5000
+                    </span>
+
+                    <button
+                        id="clearButton"
+                        class="icon-button"
+                        title="Clear"
+                        aria-label="Clear"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="translation-box result-box">
+
+                <div
+                    id="translationResult"
+                    class="translation-result"
+                >
+                    Translation
+                </div>
+
+                <div class="box-footer">
+
+                    <span id="translationStatus"></span>
+
+                    <button
+                        id="copyButton"
+                        class="icon-button copy-button"
+                        title="Copy translation"
+                        aria-label="Copy translation"
+                    >
+                        ⧉
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="translator-actions">
+
+            <button
+                id="translateButton"
+                class="translate-button"
+            >
+                <span id="translateButtonText">
+                    Translate
+                </span>
+
+                <span
+                    id="translateSpinner"
+                    class="spinner hidden"
+                ></span>
+            </button>
+
+        </div>
+
+
+        <div
+            id="errorMessage"
+            class="error-message hidden"
+        ></div>
+
+    </section>
+
+
+    <section class="features">
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                ⚡
+            </div>
+
+            <h3>Fast translation</h3>
+
+            <p>
+                Send your text directly to the Dhiren Translate API
+                and get the result quickly.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🌎
+            </div>
+
+            <h3>Many languages</h3>
+
+            <p>
+                Select from a large collection of supported languages.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon">
+                🔌
+            </div>
+
+            <h3>Developer API</h3>
+
+            <p>
+                Use the same translation service from your own applications.
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-inner">
+
+        <div>
+            © <span id="year"></span> Dhiren Translate
+        </div>
+
+        <div class="footer-links">
+            <a href="/api-docs">API Docs</a>
+            <a href="/excel-addin">Excel Add-in</a>
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script src="/app.js"></script>
+
+</body>
+</html>
