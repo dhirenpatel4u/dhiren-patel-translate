@@ -14,7 +14,7 @@
 
     <meta
         name="description"
-        content="Translate text between supported languages using Dhiren Translate."
+        content="Dhiren Translate - Fast and simple online translation."
     >
 
     <link
@@ -27,6 +27,10 @@
 
 <body>
 
+
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
 
 <header class="site-header">
 
@@ -75,10 +79,10 @@
 
 
         <button
-            class="mobile-menu-button"
             id="mobileMenuButton"
-            aria-label="Open menu"
+            class="mobile-menu-button"
             type="button"
+            aria-label="Open menu"
         >
             ☰
         </button>
@@ -87,8 +91,8 @@
 
 
     <div
-        class="mobile-nav"
         id="mobileNav"
+        class="mobile-nav"
     >
 
         <a href="/">
@@ -108,6 +112,10 @@
 </header>
 
 
+
+<!-- =====================================================
+     MAIN
+     ===================================================== -->
 
 <main class="translator-page">
 
@@ -147,7 +155,9 @@
 
 
 
-    <!-- TRANSLATOR -->
+    <!-- =================================================
+         TRANSLATOR CARD
+         ================================================= -->
 
     <section class="translator-card">
 
@@ -163,8 +173,7 @@
                     id="sourceLanguage"
                     class="language-select"
                     aria-label="Source language"
-                >
-                </select>
+                ></select>
 
             </div>
 
@@ -172,9 +181,9 @@
             <button
                 id="swapButton"
                 class="swap-button"
+                type="button"
                 title="Swap languages"
                 aria-label="Swap languages"
-                type="button"
             >
                 ⇄
             </button>
@@ -188,8 +197,7 @@
                     id="targetLanguage"
                     class="language-select"
                     aria-label="Target language"
-                >
-                </select>
+                ></select>
 
             </div>
 
@@ -203,7 +211,9 @@
         <div class="translation-area">
 
 
-            <!-- SOURCE -->
+            <!-- =========================================
+                 SOURCE TEXT
+                 ========================================= -->
 
             <div
                 class="translation-box source-box"
@@ -212,8 +222,8 @@
 
                 <textarea
                     id="sourceText"
-                    placeholder="Enter text"
                     maxlength="5000"
+                    placeholder="Enter text"
                     spellcheck="true"
                     aria-label="Text to translate"
                 ></textarea>
@@ -252,39 +262,9 @@
                 <div class="box-footer">
 
 
+                    <!-- ONLY IMAGE BUTTON -->
+
                     <div class="source-tools">
-
-
-                        <!-- CAMERA -->
-
-                        <label
-                            for="cameraInput"
-                            class="ocr-button"
-                            title="Scan text using camera"
-                        >
-
-                            <span class="ocr-icon">
-                                📷
-                            </span>
-
-                            <span class="ocr-label">
-                                Camera
-                            </span>
-
-                        </label>
-
-
-                        <input
-                            id="cameraInput"
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            hidden
-                        >
-
-
-
-                        <!-- IMAGE -->
 
                         <label
                             for="imageInput"
@@ -296,7 +276,7 @@
                                 🖼️
                             </span>
 
-                            <span class="ocr-label">
+                            <span>
                                 Image
                             </span>
 
@@ -310,12 +290,10 @@
                             hidden
                         >
 
-
                     </div>
 
 
                     <div class="source-footer-right">
-
 
                         <span id="characterCount">
                             0 / 5000
@@ -325,13 +303,12 @@
                         <button
                             id="clearButton"
                             class="icon-button"
+                            type="button"
                             title="Clear"
                             aria-label="Clear"
-                            type="button"
                         >
                             ×
                         </button>
-
 
                     </div>
 
@@ -343,7 +320,9 @@
 
 
 
-            <!-- RESULT -->
+            <!-- =========================================
+                 TRANSLATION RESULT
+                 ========================================= -->
 
             <div
                 class="translation-box result-box"
@@ -361,16 +340,17 @@
                 <div class="box-footer">
 
 
-                    <span id="translationStatus">
-                    </span>
+                    <span
+                        id="translationStatus"
+                    ></span>
 
 
                     <button
                         id="copyButton"
-                        class="icon-button copy-button"
+                        class="icon-button"
+                        type="button"
                         title="Copy translation"
                         aria-label="Copy translation"
-                        type="button"
                     >
                         ⧉
                     </button>
@@ -390,7 +370,6 @@
 
         <div class="translator-actions">
 
-
             <button
                 id="translateButton"
                 class="translate-button"
@@ -407,9 +386,7 @@
                     class="spinner hidden"
                 ></span>
 
-
             </button>
-
 
         </div>
 
@@ -427,7 +404,9 @@
 
 
 
-    <!-- FEATURES -->
+    <!-- =================================================
+         FEATURES
+         ================================================= -->
 
     <section class="features">
 
@@ -443,13 +422,11 @@
             </h3>
 
             <p>
-                Send your text directly to the
-                Dhiren Translate API and get the
-                result quickly.
+                Translate text quickly using
+                the Dhiren Translate API.
             </p>
 
         </div>
-
 
 
         <div class="feature-card">
@@ -470,11 +447,10 @@
         </div>
 
 
-
         <div class="feature-card">
 
             <div class="feature-icon">
-                📷
+                🖼️
             </div>
 
             <h3>
@@ -482,9 +458,8 @@
             </h3>
 
             <p>
-                Take a photo or choose an image
-                and automatically extract text
-                into the translation box.
+                Select an image and automatically
+                extract its text into the translator.
             </p>
 
         </div>
@@ -497,10 +472,13 @@
 
 
 
+<!-- =====================================================
+     FOOTER
+     ===================================================== -->
+
 <footer class="site-footer">
 
     <div class="footer-inner">
-
 
         <div>
 
@@ -523,24 +501,22 @@
 
         </div>
 
-
     </div>
 
 </footer>
 
 
 
-<!--
-    Tesseract.js OCR
-
-    OCR runs directly in the browser.
-    No OCR API key is required.
--->
+<!-- =====================================================
+     TESSERACT OCR
+     ===================================================== -->
 
 <script
     src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"
 ></script>
 
+
+<!-- APPLICATION -->
 
 <script src="/app.js"></script>
 
