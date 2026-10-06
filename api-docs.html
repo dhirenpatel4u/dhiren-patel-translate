@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>API Documentation - Dhiren Translate</title>
+
+    <meta
+        name="description"
+        content="Dhiren Translate API documentation."
+    >
+
+    <link rel="stylesheet" href="/styles.css">
+
+</head>
+
+
+<body>
+
+<header class="site-header">
+
+    <div class="header-inner">
+
+        <a href="/" class="brand">
+
+            <span class="brand-icon">文</span>
+
+            <span>Dhiren Translate</span>
+
+        </a>
+
+
+        <nav class="main-nav">
+
+            <a href="/" class="nav-link">
+                Translate
+            </a>
+
+            <a
+                href="/api-docs"
+                class="nav-link active"
+            >
+                API Docs
+            </a>
+
+            <a
+                href="/excel-addin"
+                class="nav-link"
+            >
+                Excel Add-in
+            </a>
+
+        </nav>
+
+
+        <button
+            class="mobile-menu-button"
+            id="mobileMenuButton"
+            aria-label="Open menu"
+        >
+            ☰
+        </button>
+
+    </div>
+
+
+    <div
+        class="mobile-nav"
+        id="mobileNav"
+    >
+
+        <a href="/">Translate</a>
+
+        <a href="/api-docs">API Docs</a>
+
+        <a href="/excel-addin">Excel Add-in</a>
+
+    </div>
+
+</header>
+
+
+<main class="docs-page">
+
+    <section class="docs-header">
+
+        <div class="hero-badge">
+            <span></span>
+            Developer API
+        </div>
+
+        <h1>
+            Dhiren Translate API
+        </h1>
+
+        <p>
+            A simple HTTP API for translating text between
+            supported languages.
+        </p>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Endpoint</h2>
+
+        <p>
+            The translation API uses a GET request.
+        </p>
+
+        <div class="endpoint">
+            GET /api/?sl={source}&amp;tl={target}&amp;q={text}
+        </div>
+
+        <table class="info-table">
+
+            <thead>
+
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td><code>sl</code></td>
+                    <td>Source language code</td>
+                    <td><code>en</code></td>
+                </tr>
+
+                <tr>
+                    <td><code>tl</code></td>
+                    <td>Target language code</td>
+                    <td><code>hi</code></td>
+                </tr>
+
+                <tr>
+                    <td><code>q</code></td>
+                    <td>Text to translate</td>
+                    <td><code>Hello world</code></td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Example request</h2>
+
+        <p>
+            Translate "Hello world" from English to Hindi:
+        </p>
+
+        <div class="code-block">
+
+<pre>GET /api/?sl=en&amp;tl=hi&amp;q=Hello%20world</pre>
+
+        </div>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>JavaScript</h2>
+
+        <div class="code-block">
+
+<pre>const params = new URLSearchParams({
+    sl: "en",
+    tl: "hi",
+    q: "Hello world"
+});
+
+const response = await fetch(
+    "/api/?" + params.toString()
+);
+
+const data = await response.json();
+
+console.log(data.result);</pre>
+
+        </div>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Python</h2>
+
+        <div class="code-block">
+
+<pre>import requests
+
+response = requests.get(
+    "https://your-domain.com/api/",
+    params={
+        "sl": "en",
+        "tl": "hi",
+        "q": "Hello world"
+    }
+)
+
+data = response.json()
+
+print(data["result"])</pre>
+
+        </div>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>cURL</h2>
+
+        <div class="code-block">
+
+<pre>curl "https://your-domain.com/api/?sl=en&amp;tl=hi&amp;q=Hello%20world"</pre>
+
+        </div>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Response</h2>
+
+        <p>
+            A successful request returns JSON containing
+            the translation result.
+        </p>
+
+        <div class="code-block">
+
+<pre>{
+    "response": "success",
+    "sl": "en",
+    "tl": "hi",
+    "result": "नमस्ते दुनिया"
+}</pre>
+
+        </div>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Using your own domain</h2>
+
+        <p>
+            If your website is:
+        </p>
+
+        <div class="endpoint">
+            https://example.com
+        </div>
+
+        <p>
+            Your API URL becomes:
+        </p>
+
+        <div class="endpoint">
+            https://example.com/api/
+        </div>
+
+        <p>
+            The frontend translator on this website automatically
+            uses the same-origin <code>/api/</code> endpoint.
+        </p>
+
+    </section>
+
+
+    <section class="docs-card">
+
+        <h2>Important</h2>
+
+        <p>
+            The API implementation is intentionally kept separate
+            from this website frontend. You can continue using your
+            existing Python API without changing its code.
+        </p>
+
+    </section>
+
+</main>
+
+
+<footer class="site-footer">
+
+    <div class="footer-inner">
+
+        <div>
+            © <span id="year"></span> Dhiren Translate
+        </div>
+
+        <div class="footer-links">
+
+            <a href="/">Translate</a>
+
+            <a href="/excel-addin">
+                Excel Add-in
+            </a>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<script>
+
+document.getElementById("year").textContent =
+    new Date().getFullYear();
+
+
+const button =
+    document.getElementById("mobileMenuButton");
+
+const nav =
+    document.getElementById("mobileNav");
+
+
+button.addEventListener(
+    "click",
+    function () {
+        nav.classList.toggle("open");
+    }
+);
+
+</script>
+
+</body>
+
+</html>
