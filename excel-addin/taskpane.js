@@ -1,97 +1,41 @@
 "use strict";
 
-/* global Office, Excel */
-
-
-/* =========================================================
-   API
-   ========================================================= */
-
 const API_URL =
     "https://dhiren-patel-translate.vercel.app/api/";
 
-
-/* =========================================================
-   DOM ELEMENTS
-   ========================================================= */
-
 const sourceLanguage =
-    document.getElementById(
-        "sourceLanguage"
-    );
-
+    document.getElementById("sourceLanguage");
 
 const targetLanguage =
-    document.getElementById(
-        "targetLanguage"
-    );
-
+    document.getElementById("targetLanguage");
 
 const sourceText =
-    document.getElementById(
-        "sourceText"
-    );
-
+    document.getElementById("sourceText");
 
 const translateButton =
-    document.getElementById(
-        "translateButton"
-    );
-
+    document.getElementById("translateButton");
 
 const result =
-    document.getElementById(
-        "result"
-    );
-
+    document.getElementById("result");
 
 const status =
-    document.getElementById(
-        "status"
-    );
-
+    document.getElementById("status");
 
 const getSelectionButton =
-    document.getElementById(
-        "getSelectionButton"
-    );
-
+    document.getElementById("getSelectionButton");
 
 const writeExcelButton =
-    document.getElementById(
-        "writeExcelButton"
-    );
-
+    document.getElementById("writeExcelButton");
 
 const excelInfo =
-    document.getElementById(
-        "excelInfo"
-    );
+    document.getElementById("excelInfo");
 
-
-/* =========================================================
-   VARIABLES
-   ========================================================= */
-
-/*
- * Stores the Excel range that was selected.
- */
-
-let selectedExcelRange = null;
-
-
-/*
- * Stores the original values from Excel.
- */
 
 let selectedExcelValues = [];
 
-
-/*
- * Stores translated values.
- */
-
 let translatedExcelValues = [];
+
+let isExcel = false;
 
 
 /* =========================================================
@@ -105,7 +49,6 @@ function setStatus(
 ) {
 
     status.textContent = text;
-
 
     if (error) {
 
@@ -125,198 +68,95 @@ function setStatus(
             "status";
 
     }
-
 }
 
 
 /* =========================================================
-   EXCEL INITIALIZATION
+   INITIALIZE
    ========================================================= */
 
-Office.onReady(
-    function (info) {
+function initializePage() {
 
-        if (
-            info.host !==
-            Office.HostType.Excel
-        ) {
+    /*
+     * Translate works everywhere.
+     */
 
-            setStatus(
-                "This add-in must be opened in Excel.",
-                true
-            );
-
-            return;
-
-        }
+    translateButton.addEventListener(
+        "click",
+        translate
+    );
 
 
-        /*
-         * Get Excel selection.
-         */
+    /*
+     * Excel-only buttons.
+     */
+
+    if (getSelectionButton) {
 
         getSelectionButton.addEventListener(
             "click",
             getSelectedExcelCells
         );
 
-
-        /*
-         * Translate.
-         */
-
-        translateButton.addEventListener(
-            "click",
-            translate
-        );
+    }
 
 
-        /*
-         * Write translation back.
-         */
+    if (writeExcelButton) {
 
         writeExcelButton.addEventListener(
             "click",
             writeTranslationToExcel
         );
 
-
-        setStatus(
-            "Dhiren Translate is ready.",
-            false,
-            true
-        );
-
     }
-);
 
 
-/* =========================================================
-   GET SELECTED EXCEL CELLS
-   ========================================================= */
+    /*
+     * Check whether Office.js is running.
+     */
 
-async function getSelectedExcelCells() {
+    if (
+        typeof Office !== "undefined" &&
+        Office.onReady
+    ) {
 
-    try {
+        Office.onReady(
+            function (info) {
 
-        setStatus(
-            "Reading selected Excel cells..."
-        );
+                if (
+                    info.host ===
+                    Office.HostType.Excel
+                ) {
 
+                    isExcel = true;
 
-        await Excel.run(
-            async function (context) {
-
-
-                /*
-                 * Get currently selected range.
-                 */
-
-                const range =
-                    context.workbook
-                        .getSelectedRange();
-
-
-                /*
-                 * Load range information.
-                 */
-
-                range.load([
-                    "address",
-                    "values",
-                    "rowCount",
-                    "columnCount"
-                ]);
-
-
-                await context.sync();
-
-
-                /*
-                 * Save selection.
-                 */
-
-                selectedExcelRange =
-                    range;
-
-
-                selectedExcelValues =
-                    range.values;
-
-
-                /*
-                 * Convert cells to text.
-                 */
-
-                const lines =
-                    selectedExcelValues.map(
-                        function (row) {
-
-                            return row
-                                .map(
-                                    function (cell) {
-
-                                        return cell === null ||
-                                            cell === undefined
-                                            ? ""
-                                            : String(cell);
-
-                                    }
-                                )
-                                .join("\t");
-
-                        }
+                    setStatus(
+                        "Dhiren Translate is ready.",
+                        false,
+                        true
                     );
 
+                }
+                else {
 
-                sourceText.value =
-                    lines.join("\n");
+                    setStatus(
+                        "Browser mode."
+                    );
 
-
-                /*
-                 * Clear old translation.
-                 */
-
-                translatedExcelValues = [];
-
-
-                result.textContent =
-                    "Translation will appear here.";
-
-
-                /*
-                 * Display selection info.
-                 */
-
-                excelInfo.textContent =
-                    "Selected: " +
-                    range.address +
-                    " (" +
-                    range.rowCount +
-                    " row(s), " +
-                    range.columnCount +
-                    " column(s))";
-
-
-                setStatus(
-                    "Excel cells loaded.",
-                    false,
-                    true
-                );
+                }
 
             }
         );
 
     }
-    catch (error) {
+    else {
 
-        console.error(error);
-
+        /*
+         * Normal browser.
+         */
 
         setStatus(
-            "Excel error: " +
-            error.message,
-            true
+            "Browser mode."
         );
 
     }
@@ -334,21 +174,15 @@ async function translate() {
         sourceText.value.trim();
 
 
-    /*
-     * Check text.
-     */
-
     if (!text) {
 
         result.textContent =
             "Please enter text.";
 
-
         setStatus(
             "Please enter text.",
             true
         );
-
 
         return;
 
@@ -359,10 +193,6 @@ async function translate() {
         true;
 
 
-    writeExcelButton.disabled =
-        true;
-
-
     setStatus(
         "Translating..."
     );
@@ -370,9 +200,8 @@ async function translate() {
 
     try {
 
-
         /*
-         * If Excel cells were loaded,
+         * If cells were loaded from Excel,
          * translate each cell separately.
          */
 
@@ -386,7 +215,7 @@ async function translate() {
         else {
 
             /*
-             * Normal manual translation.
+             * Normal text translation.
              */
 
             const translated =
@@ -398,14 +227,14 @@ async function translate() {
             result.textContent =
                 translated;
 
+
+            setStatus(
+                "Translation completed.",
+                false,
+                true
+            );
+
         }
-
-
-        setStatus(
-            "Translation completed.",
-            false,
-            true
-        );
 
     }
     catch (error) {
@@ -428,22 +257,16 @@ async function translate() {
         translateButton.disabled =
             false;
 
-
-        writeExcelButton.disabled =
-            false;
-
     }
 
 }
 
 
 /* =========================================================
-   TRANSLATE ONE TEXT
+   TRANSLATE SINGLE TEXT
    ========================================================= */
 
-async function translateSingleText(
-    text
-) {
+async function translateSingleText(text) {
 
     const params =
         new URLSearchParams({
@@ -496,6 +319,123 @@ async function translateSingleText(
 
 
     return translated;
+}
+
+
+/* =========================================================
+   GET SELECTED EXCEL CELLS
+   ========================================================= */
+
+async function getSelectedExcelCells() {
+
+    if (!isExcel) {
+
+        setStatus(
+            "This button works only inside Excel.",
+            true
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        setStatus(
+            "Reading selected Excel cells..."
+        );
+
+
+        await Excel.run(
+            async function (context) {
+
+                const range =
+                    context.workbook
+                        .getSelectedRange();
+
+
+                range.load([
+                    "address",
+                    "values",
+                    "rowCount",
+                    "columnCount"
+                ]);
+
+
+                await context.sync();
+
+
+                selectedExcelValues =
+                    range.values;
+
+
+                /*
+                 * Put Excel contents into textarea.
+                 */
+
+                const text =
+                    selectedExcelValues
+                        .map(
+                            function (row) {
+
+                                return row
+                                    .map(
+                                        function (cell) {
+
+                                            return cell === null ||
+                                                cell === undefined
+                                                ? ""
+                                                : String(cell);
+
+                                        }
+                                    )
+                                    .join("\t");
+
+                            }
+                        )
+                        .join("\n");
+
+
+                sourceText.value =
+                    text;
+
+
+                translatedExcelValues =
+                    [];
+
+
+                excelInfo.textContent =
+                    "Selected: " +
+                    range.address;
+
+
+                result.textContent =
+                    "Translation will appear here.";
+
+
+                setStatus(
+                    "Excel cells loaded.",
+                    false,
+                    true
+                );
+
+            }
+        );
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+
+        setStatus(
+            "Excel error: " +
+            error.message,
+            true
+        );
+
+    }
 
 }
 
@@ -506,59 +446,49 @@ async function translateSingleText(
 
 async function translateExcelCells() {
 
-    /*
-     * Number of rows.
-     */
-
-    const rowCount =
+    const rows =
         selectedExcelValues.length;
 
 
-    /*
-     * Number of columns.
-     */
-
-    const columnCount =
-        rowCount > 0
+    const columns =
+        rows > 0
             ? selectedExcelValues[0].length
             : 0;
 
 
-    /*
-     * Prepare output array.
-     */
-
     translatedExcelValues =
         Array.from(
             {
-                length: rowCount
+                length: rows
             },
             function () {
 
                 return Array(
-                    columnCount
+                    columns
                 ).fill("");
 
             }
         );
 
 
+    let total = 0;
+
+    let completed = 0;
+
+
     /*
-     * Count cells.
+     * Count non-empty cells.
      */
-
-    let totalCells = 0;
-
 
     for (
         let r = 0;
-        r < rowCount;
+        r < rows;
         r++
     ) {
 
         for (
             let c = 0;
-            c < columnCount;
+            c < columns;
             c++
         ) {
 
@@ -572,7 +502,7 @@ async function translateExcelCells() {
                 String(value).trim() !== ""
             ) {
 
-                totalCells++;
+                total++;
 
             }
 
@@ -581,32 +511,25 @@ async function translateExcelCells() {
     }
 
 
-    let completedCells = 0;
-
-
     /*
-     * Translate every non-empty cell.
+     * Translate each cell.
      */
 
     for (
         let r = 0;
-        r < rowCount;
+        r < rows;
         r++
     ) {
 
         for (
             let c = 0;
-            c < columnCount;
+            c < columns;
             c++
         ) {
 
             const value =
                 selectedExcelValues[r][c];
 
-
-            /*
-             * Empty cell.
-             */
 
             if (
                 value === null ||
@@ -622,25 +545,17 @@ async function translateExcelCells() {
             }
 
 
-            /*
-             * Translate.
-             */
-
             translatedExcelValues[r][c] =
                 await translateSingleText(
                     String(value)
                 );
 
 
-            completedCells++;
+            completed++;
 
 
             setStatus(
-                "Translated " +
-                completedCells +
-                " of " +
-                totalCells +
-                " cell(s)..."
+                `Translated ${completed} of ${total} cell(s)...`
             );
 
         }
@@ -649,7 +564,7 @@ async function translateExcelCells() {
 
 
     /*
-     * Display translated values.
+     * Display result.
      */
 
     const displayText =
@@ -669,7 +584,7 @@ async function translateExcelCells() {
 
 
     setStatus(
-        "All cells translated.",
+        "Translation completed.",
         false,
         true
     );
@@ -678,22 +593,15 @@ async function translateExcelCells() {
 
 
 /* =========================================================
-   WRITE TRANSLATION TO EXCEL
+   WRITE BACK TO EXCEL
    ========================================================= */
 
 async function writeTranslationToExcel() {
 
-    /*
-     * Check whether Excel data exists.
-     */
-
-    if (
-        !selectedExcelValues ||
-        selectedExcelValues.length === 0
-    ) {
+    if (!isExcel) {
 
         setStatus(
-            "First select Excel cells.",
+            "This button works only inside Excel.",
             true
         );
 
@@ -702,17 +610,12 @@ async function writeTranslationToExcel() {
     }
 
 
-    /*
-     * Check translated data.
-     */
-
     if (
-        !translatedExcelValues ||
         translatedExcelValues.length === 0
     ) {
 
         setStatus(
-            "Translate the selected cells first.",
+            "Translate something first.",
             true
         );
 
@@ -735,31 +638,14 @@ async function writeTranslationToExcel() {
         await Excel.run(
             async function (context) {
 
-
-                /*
-                 * Get currently selected range.
-                 *
-                 * This allows the user to select
-                 * the same range again before
-                 * writing.
-                 */
-
                 const range =
                     context.workbook
                         .getSelectedRange();
 
 
-                /*
-                 * Write translated values.
-                 */
-
                 range.values =
                     translatedExcelValues;
 
-
-                /*
-                 * Save changes.
-                 */
 
                 await context.sync();
 
@@ -794,3 +680,10 @@ async function writeTranslationToExcel() {
     }
 
 }
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+initializePage();
