@@ -18,18 +18,20 @@
  Translation API:
     /api/?sl=SOURCE&tl=TARGET&q=TEXT
 
- IMPORTANT:
-    - Preserve OCR line positions
-    - Preserve multiple spaces where OCR provides them
-    - Avoid translated text overlap
-    - Maintain approximate original font size
-    - Maintain approximate boldness
+ VERSION:
+    Word-level OCR positioning
+    Safer background replacement
+    Better spacing
+    Better font sizing
+    Reduced overlap
+    Failed translation keeps original text
 ===========================================================
 */
 
 console.log("====================================");
 console.log("Dhiren Translate PDF module starting");
 console.log("====================================");
+
 
 /* =========================================================
    ELEMENTS
@@ -72,6 +74,34 @@ const PDF_WORKER_URL =
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 
+/*
+ * Small cover padding.
+ *
+ * IMPORTANT:
+ * Keep this very small.
+ * Large padding creates white strips.
+ */
+const PDF_COVER_PADDING = 0.8;
+
+
+/*
+ * Minimum confidence accepted for OCR words.
+ */
+const PDF_MIN_OCR_CONFIDENCE = 20;
+
+
+/*
+ * Minimum font size.
+ */
+const PDF_MIN_FONT_SIZE = 5;
+
+
+/*
+ * Maximum font size.
+ */
+const PDF_MAX_FONT_SIZE = 28;
+
+
 /* =========================================================
    PDF TRANSLATION LANGUAGES
    ========================================================= */
@@ -79,7 +109,9 @@ const PDF_WORKER_URL =
 const PDF_SUPPORTED_LANGUAGES = {
 
     hi: {
-        name: "Hindi",
+
+        name:
+            "Hindi",
 
         fontFile:
             "/fonts/NotoSansDevanagari-Regular.ttf",
@@ -89,7 +121,9 @@ const PDF_SUPPORTED_LANGUAGES = {
     },
 
     mr: {
-        name: "Marathi",
+
+        name:
+            "Marathi",
 
         fontFile:
             "/fonts/NotoSansDevanagari-Regular.ttf",
@@ -99,7 +133,9 @@ const PDF_SUPPORTED_LANGUAGES = {
     },
 
     gu: {
-        name: "Gujarati",
+
+        name:
+            "Gujarati",
 
         fontFile:
             "/fonts/NotoSansGujarati-Regular.ttf",
@@ -266,7 +302,9 @@ function pdfSetProgress(value) {
         pdfProgress.style.width =
             safeValue + "%";
 
-        if ("value" in pdfProgress) {
+        if (
+            "value" in pdfProgress
+        ) {
 
             pdfProgress.value =
                 safeValue;
@@ -293,7 +331,9 @@ function pdfHideProgress() {
         pdfProgress.style.width =
             "0%";
 
-        if ("value" in pdfProgress) {
+        if (
+            "value" in pdfProgress
+        ) {
 
             pdfProgress.value =
                 0;
@@ -334,7 +374,8 @@ function pdfShowError(message) {
     if (pdfError) {
 
         pdfError.textContent =
-            "❌ " + String(message);
+            "❌ " +
+            String(message);
 
         pdfError.classList.remove(
             "hidden"
@@ -342,7 +383,8 @@ function pdfShowError(message) {
     }
 
     pdfSetStatus(
-        "❌ " + String(message)
+        "❌ " +
+        String(message)
     );
 }
 
@@ -372,6 +414,7 @@ function pdfCheckLibraries() {
         typeof window.jspdf
     );
 
+
     if (
         typeof window.pdfjsLib ===
         "undefined"
@@ -381,6 +424,7 @@ function pdfCheckLibraries() {
             "PDF.js is not loaded."
         );
     }
+
 
     if (
         typeof window.Tesseract ===
@@ -392,6 +436,7 @@ function pdfCheckLibraries() {
         );
     }
 
+
     if (
         typeof window.jspdf ===
         "undefined"
@@ -402,6 +447,7 @@ function pdfCheckLibraries() {
         );
     }
 
+
     if (
         typeof window.jspdf.jsPDF !==
         "function"
@@ -411,6 +457,7 @@ function pdfCheckLibraries() {
             "jsPDF constructor is not available."
         );
     }
+
 
     console.log(
         "All PDF libraries loaded successfully."
@@ -432,10 +479,12 @@ function pdfInitializePDFJS() {
         return;
     }
 
+
     window.pdfjsLib
         .GlobalWorkerOptions
         .workerSrc =
         PDF_WORKER_URL;
+
 
     console.log(
         "PDF.js worker configured."
@@ -454,6 +503,7 @@ function pdfGetSourceLanguage() {
         return "auto";
     }
 
+
     const value =
         String(
             pdfSourceLanguage.value ||
@@ -461,6 +511,7 @@ function pdfGetSourceLanguage() {
         )
         .trim()
         .toLowerCase();
+
 
     return value || "auto";
 }
@@ -477,6 +528,7 @@ function pdfGetTargetLanguage() {
         return "";
     }
 
+
     const value =
         String(
             pdfTargetLanguage.value ||
@@ -484,6 +536,7 @@ function pdfGetTargetLanguage() {
         )
         .trim()
         .toLowerCase();
+
 
     return value;
 }
@@ -493,7 +546,9 @@ function pdfGetTargetLanguage() {
    NORMALIZE LANGUAGE
    ========================================================= */
 
-function pdfNormalizeLanguage(language) {
+function pdfNormalizeLanguage(
+    language
+) {
 
     return String(
         language || ""
@@ -516,6 +571,7 @@ function pdfGetPDFLanguageConfig() {
             pdfGetTargetLanguage()
         );
 
+
     return (
         PDF_SUPPORTED_LANGUAGES[target] ||
         null
@@ -534,6 +590,7 @@ function pdfGetOCRLanguage() {
             pdfGetSourceLanguage()
         );
 
+
     return (
         PDF_OCR_LANGUAGE_MAP[source] ||
         "eng"
@@ -545,7 +602,9 @@ function pdfGetOCRLanguage() {
    LOAD FONT
    ========================================================= */
 
-async function pdfLoadFont(fontFile) {
+async function pdfLoadFont(
+    fontFile
+) {
 
     if (
         pdfFontCache[fontFile]
@@ -559,21 +618,29 @@ async function pdfLoadFont(fontFile) {
         return pdfFontCache[fontFile];
     }
 
+
     console.log(
         "Loading PDF font:",
         fontFile
     );
 
+
     const response =
         await fetch(
             fontFile,
             {
-                method: "GET",
-                cache: "force-cache"
+                method:
+                    "GET",
+
+                cache:
+                    "force-cache"
             }
         );
 
-    if (!response.ok) {
+
+    if (
+        !response.ok
+    ) {
 
         throw new Error(
             "Could not load PDF font: " +
@@ -584,8 +651,10 @@ async function pdfLoadFont(fontFile) {
         );
     }
 
+
     const buffer =
         await response.arrayBuffer();
+
 
     if (
         !buffer ||
@@ -598,17 +667,26 @@ async function pdfLoadFont(fontFile) {
         );
     }
 
-    const bytes =
-        new Uint8Array(buffer);
 
-    let binary = "";
+    const bytes =
+        new Uint8Array(
+            buffer
+        );
+
+
+    let binary =
+        "";
+
 
     const chunkSize =
         0x8000;
 
+
     for (
         let i = 0;
+
         i < bytes.length;
+
         i += chunkSize
     ) {
 
@@ -621,17 +699,23 @@ async function pdfLoadFont(fontFile) {
                 )
             );
 
+
         binary +=
             String.fromCharCode(
                 ...chunk
             );
     }
 
+
     const base64 =
-        btoa(binary);
+        btoa(
+            binary
+        );
+
 
     pdfFontCache[fontFile] =
         base64;
+
 
     console.log(
         "Font loaded successfully:",
@@ -639,6 +723,7 @@ async function pdfLoadFont(fontFile) {
         "bytes:",
         buffer.byteLength
     );
+
 
     return base64;
 }
@@ -658,6 +743,7 @@ function pdfCreateOutputDocument(
     const jsPDF =
         window.jspdf.jsPDF;
 
+
     const pdf =
         new jsPDF({
 
@@ -666,30 +752,37 @@ function pdfCreateOutputDocument(
                     ? "landscape"
                     : "portrait",
 
-            unit: "pt",
+            unit:
+                "pt",
 
-            format: [
-                width,
-                height
-            ],
+            format:
+                [
+                    width,
+                    height
+                ],
 
-            compress: true
+            compress:
+                true
         });
+
 
     const fontFileName =
         fontInfo.fontFile
             .split("/")
             .pop();
 
+
     console.log(
         "Registering PDF font:",
         fontFileName
     );
 
+
     pdf.addFileToVFS(
         fontFileName,
         fontBase64
     );
+
 
     pdf.addFont(
         fontFileName,
@@ -697,15 +790,18 @@ function pdfCreateOutputDocument(
         "normal"
     );
 
+
     pdf.setFont(
         fontInfo.fontName,
         "normal"
     );
 
+
     console.log(
         "PDF Unicode font registered:",
         fontInfo.fontName
     );
+
 
     return pdf;
 }
@@ -715,18 +811,23 @@ function pdfCreateOutputDocument(
    LOAD PDF
    ========================================================= */
 
-async function pdfLoadDocument(file) {
+async function pdfLoadDocument(
+    file
+) {
 
     pdfSetStatus(
         "📖 Reading PDF..."
     );
 
+
     pdfSetProgress(
         5
     );
 
+
     const buffer =
         await file.arrayBuffer();
+
 
     if (
         !buffer ||
@@ -738,28 +839,36 @@ async function pdfLoadDocument(file) {
         );
     }
 
+
     console.log(
         "PDF bytes:",
         buffer.byteLength
     );
 
+
     const loadingTask =
         window.pdfjsLib.getDocument({
             data:
-                new Uint8Array(buffer)
+                new Uint8Array(
+                    buffer
+                )
         });
+
 
     const pdf =
         await loadingTask.promise;
+
 
     console.log(
         "PDF successfully loaded."
     );
 
+
     console.log(
         "PDF pages:",
         pdf.numPages
     );
+
 
     return pdf;
 }
@@ -769,7 +878,9 @@ async function pdfLoadDocument(file) {
    RENDER PDF PAGE
    ========================================================= */
 
-async function pdfRenderPage(page) {
+async function pdfRenderPage(
+    page
+) {
 
     const viewport =
         page.getViewport({
@@ -777,20 +888,24 @@ async function pdfRenderPage(page) {
                 PDF_RENDER_SCALE
         });
 
+
     const canvas =
         document.createElement(
             "canvas"
         );
+
 
     canvas.width =
         Math.ceil(
             viewport.width
         );
 
+
     canvas.height =
         Math.ceil(
             viewport.height
         );
+
 
     const context =
         canvas.getContext(
@@ -801,12 +916,14 @@ async function pdfRenderPage(page) {
             }
         );
 
+
     if (!context) {
 
         throw new Error(
             "Could not create PDF canvas."
         );
     }
+
 
     await page.render({
 
@@ -817,6 +934,7 @@ async function pdfRenderPage(page) {
             viewport
 
     }).promise;
+
 
     return {
 
@@ -838,14 +956,17 @@ async function pdfCreateOCRWorker() {
     const language =
         pdfGetOCRLanguage();
 
+
     console.log(
         "Creating Tesseract worker:",
         language
     );
 
+
     pdfSetStatus(
         "🔤 Loading OCR engine..."
     );
+
 
     const worker =
         await window.Tesseract
@@ -868,10 +989,13 @@ async function pdfCreateOCRWorker() {
                                         (
                                             info.progress ||
                                             0
-                                        ) * 100
-                                    ) + "%"
+                                        ) *
+                                        100
+                                    ) +
+                                    "%"
                                 );
                             }
+
 
                             if (
                                 info &&
@@ -885,17 +1009,21 @@ async function pdfCreateOCRWorker() {
                                         (
                                             info.progress ||
                                             0
-                                        ) * 100
-                                    ) + "%"
+                                        ) *
+                                        100
+                                    ) +
+                                    "%"
                                 );
                             }
                         }
                 }
             );
 
+
     console.log(
         "Tesseract worker ready."
     );
+
 
     return worker;
 }
@@ -916,10 +1044,12 @@ async function pdfOCRPage(
         `🔍 OCR page ${pageNumber} of ${totalPages}...`
     );
 
+
     const result =
         await worker.recognize(
             canvas
         );
+
 
     if (
         !result ||
@@ -932,12 +1062,164 @@ async function pdfOCRPage(
         );
     }
 
+
     console.log(
         "OCR completed for page:",
         pageNumber
     );
 
+
     return result.data;
+}
+
+
+/* =========================================================
+   GET OCR WORDS
+   ========================================================= */
+
+/*
+ * This is the major improvement.
+ *
+ * Instead of relying only on:
+ *
+ *     data.lines
+ *
+ * we use:
+ *
+ *     data.words
+ *
+ * Each word has its own bounding box.
+ *
+ * This gives us much better control over:
+ *
+ *     X position
+ *     Y position
+ *     word spacing
+ *     font size
+ *     overlap
+ */
+function pdfGetOCRWords(
+    data
+) {
+
+    if (
+        !data ||
+        !Array.isArray(
+            data.words
+        )
+    ) {
+
+        return [];
+    }
+
+
+    return data.words
+
+        .filter(
+            function(word) {
+
+                if (
+                    !word ||
+                    !word.bbox
+                ) {
+
+                    return false;
+                }
+
+
+                const text =
+                    String(
+                        word.text ||
+                        ""
+                    );
+
+
+                if (
+                    !text.trim()
+                ) {
+
+                    return false;
+                }
+
+
+                const confidence =
+                    Number(
+                        word.confidence
+                    );
+
+
+                if (
+                    Number.isFinite(
+                        confidence
+                    ) &&
+                    confidence <
+                        PDF_MIN_OCR_CONFIDENCE
+                ) {
+
+                    return false;
+                }
+
+
+                return true;
+            }
+        )
+
+        .map(
+            function(word) {
+
+                return {
+
+                    text:
+                        String(
+                            word.text ||
+                            ""
+                        ),
+
+                    confidence:
+                        Number(
+                            word.confidence ||
+                            0
+                        ),
+
+                    x0:
+                        Number(
+                            word.bbox.x0 ||
+                            0
+                        ),
+
+                    y0:
+                        Number(
+                            word.bbox.y0 ||
+                            0
+                        ),
+
+                    x1:
+                        Number(
+                            word.bbox.x1 ||
+                            0
+                        ),
+
+                    y1:
+                        Number(
+                            word.bbox.y1 ||
+                            0
+                        )
+                };
+            }
+        )
+
+        .filter(
+            function(word) {
+
+                return (
+                    word.x1 >
+                        word.x0 &&
+
+                    word.y1 >
+                        word.y0
+                );
+            }
+        );
 }
 
 
@@ -945,7 +1227,14 @@ async function pdfOCRPage(
    GET OCR LINES
    ========================================================= */
 
-function pdfGetOCRLines(data) {
+/*
+ * We still keep line information for translation.
+ *
+ * But word coordinates are preserved inside every line.
+ */
+function pdfGetOCRLines(
+    data
+) {
 
     if (
         !data ||
@@ -956,6 +1245,7 @@ function pdfGetOCRLines(data) {
 
         return [];
     }
+
 
     return data.lines
 
@@ -976,15 +1266,9 @@ function pdfGetOCRLines(data) {
                 /*
                  * IMPORTANT:
                  *
-                 * DO NOT use:
-                 *
-                 * replace(/\s+/g, " ")
-                 *
-                 * because that destroys multiple spaces.
-                 *
-                 * We only remove leading/trailing spaces.
+                 * Do NOT collapse spaces.
                  */
-                const originalText =
+                const text =
                     String(
                         line.text
                     )
@@ -997,14 +1281,11 @@ function pdfGetOCRLines(data) {
                         ""
                     );
 
+
                 return {
 
-                    /*
-                     * Keep the OCR text exactly
-                     * as much as Tesseract provides.
-                     */
                     text:
-                        originalText,
+                        text,
 
                     confidence:
                         Number(
@@ -1083,23 +1364,29 @@ function API_BASE_FOR_PDF(
    TRANSLATE TEXT
    ========================================================= */
 
-async function pdfTranslateText(text) {
+async function pdfTranslateText(
+    text
+) {
 
     const sourceLanguage =
         pdfGetSourceLanguage();
 
+
     const targetLanguage =
         pdfGetTargetLanguage();
+
 
     const cleanText =
         String(
             text || ""
         ).trim();
 
+
     if (!cleanText) {
 
         return "";
     }
+
 
     if (
         pdfNormalizeLanguage(
@@ -1113,6 +1400,7 @@ async function pdfTranslateText(text) {
         return cleanText;
     }
 
+
     const url =
         API_BASE_FOR_PDF(
             sourceLanguage,
@@ -1120,17 +1408,21 @@ async function pdfTranslateText(text) {
             cleanText
         );
 
+
     console.log(
         "Translation request:",
         cleanText
     );
+
 
     console.log(
         "Translation URL:",
         url
     );
 
+
     let response;
+
 
     try {
 
@@ -1142,6 +1434,7 @@ async function pdfTranslateText(text) {
                         "GET",
 
                     headers: {
+
                         Accept:
                             "application/json,text/plain,*/*"
                     }
@@ -1158,17 +1451,21 @@ async function pdfTranslateText(text) {
         );
     }
 
+
     console.log(
         "Translation HTTP status:",
         response.status
     );
+
 
     const contentType =
         response.headers.get(
             "content-type"
         ) || "";
 
+
     let data;
+
 
     if (
         contentType.includes(
@@ -1196,20 +1493,25 @@ async function pdfTranslateText(text) {
             await response.text();
     }
 
+
     console.log(
         "Translation API response:",
         data
     );
 
-    if (!response.ok) {
+
+    if (
+        !response.ok
+    ) {
 
         let errorMessage =
             "Translation API error: HTTP " +
             response.status;
 
+
         if (
             typeof data ===
-            "string" &&
+                "string" &&
             data.trim()
         ) {
 
@@ -1225,7 +1527,7 @@ async function pdfTranslateText(text) {
         } else if (
             data &&
             typeof data.error ===
-            "string"
+                "string"
         ) {
 
             errorMessage +=
@@ -1233,15 +1535,18 @@ async function pdfTranslateText(text) {
                 data.error;
         }
 
+
         throw new Error(
             errorMessage
         );
     }
 
+
     const translated =
         pdfExtractTranslation(
             data
         );
+
 
     if (!translated) {
 
@@ -1249,6 +1554,7 @@ async function pdfTranslateText(text) {
             "Translation API returned an empty translation."
         );
     }
+
 
     return translated;
 }
@@ -1258,7 +1564,9 @@ async function pdfTranslateText(text) {
    EXTRACT TRANSLATION
    ========================================================= */
 
-function pdfExtractTranslation(data) {
+function pdfExtractTranslation(
+    data
+) {
 
     if (
         typeof data ===
@@ -1268,10 +1576,12 @@ function pdfExtractTranslation(data) {
         return data.trim();
     }
 
+
     if (!data) {
 
         return "";
     }
+
 
     const keys = [
 
@@ -1290,6 +1600,7 @@ function pdfExtractTranslation(data) {
         "text"
     ];
 
+
     for (
         const key of keys
     ) {
@@ -1302,6 +1613,7 @@ function pdfExtractTranslation(data) {
             return data[key].trim();
         }
     }
+
 
     if (
         data.data !==
@@ -1316,6 +1628,7 @@ function pdfExtractTranslation(data) {
             return data.data.trim();
         }
 
+
         if (
             typeof data.data ===
             "object"
@@ -1326,6 +1639,7 @@ function pdfExtractTranslation(data) {
                     data.data
                 );
 
+
             if (nested) {
 
                 return nested;
@@ -1333,11 +1647,13 @@ function pdfExtractTranslation(data) {
         }
     }
 
+
     if (
         Array.isArray(data)
     ) {
 
         const parts = [];
+
 
         for (
             const item of data
@@ -1359,6 +1675,7 @@ function pdfExtractTranslation(data) {
                         item
                     );
 
+
                 if (itemText) {
 
                     parts.push(
@@ -1368,17 +1685,19 @@ function pdfExtractTranslation(data) {
             }
         }
 
+
         return parts
             .join(" ")
             .trim();
     }
+
 
     return "";
 }
 
 
 /* =========================================================
-   GET BACKGROUND COLOR
+   BACKGROUND COLOR
    ========================================================= */
 
 function pdfGetBackgroundColor(
@@ -1397,14 +1716,19 @@ function pdfGetBackgroundColor(
                 }
             );
 
+
         if (!ctx) {
 
             return {
+
                 r: 255,
+
                 g: 255,
+
                 b: 255
             };
         }
+
 
         const x =
             Math.max(
@@ -1414,6 +1738,7 @@ function pdfGetBackgroundColor(
                 )
             );
 
+
         const y =
             Math.max(
                 0,
@@ -1421,6 +1746,7 @@ function pdfGetBackgroundColor(
                     line.y0
                 )
             );
+
 
         const width =
             Math.min(
@@ -1437,6 +1763,7 @@ function pdfGetBackgroundColor(
                     x
             );
 
+
         const height =
             Math.min(
 
@@ -1452,17 +1779,22 @@ function pdfGetBackgroundColor(
                     y
             );
 
+
         if (
             width <= 0 ||
             height <= 0
         ) {
 
             return {
+
                 r: 255,
+
                 g: 255,
+
                 b: 255
             };
         }
+
 
         const image =
             ctx.getImageData(
@@ -1472,6 +1804,7 @@ function pdfGetBackgroundColor(
                 height
             );
 
+
         let r = 0;
 
         let g = 0;
@@ -1480,9 +1813,12 @@ function pdfGetBackgroundColor(
 
         let count = 0;
 
+
         for (
             let i = 0;
+
             i < image.data.length;
+
             i += 4
         ) {
 
@@ -1490,11 +1826,20 @@ function pdfGetBackgroundColor(
                 image.data[i];
 
             const gg =
-                image.data[i + 1];
+                image.data[
+                    i + 1
+                ];
 
             const bb =
-                image.data[i + 2];
+                image.data[
+                    i + 2
+                ];
 
+
+            /*
+             * Only bright pixels are used to
+             * estimate background.
+             */
             if (
                 rr > 180 &&
                 gg > 180 &&
@@ -1511,16 +1856,21 @@ function pdfGetBackgroundColor(
             }
         }
 
+
         if (
             count === 0
         ) {
 
             return {
+
                 r: 255,
+
                 g: 255,
+
                 b: 255
             };
         }
+
 
         return {
 
@@ -1549,9 +1899,13 @@ function pdfGetBackgroundColor(
             error
         );
 
+
         return {
+
             r: 255,
+
             g: 255,
+
             b: 255
         };
     }
@@ -1559,7 +1913,7 @@ function pdfGetBackgroundColor(
 
 
 /* =========================================================
-   DETECT APPROXIMATE BOLD
+   DETECT BOLD
    ========================================================= */
 
 function pdfDetectBold(
@@ -1578,10 +1932,12 @@ function pdfDetectBold(
                 }
             );
 
+
         if (!ctx) {
 
             return false;
         }
+
 
         const sx =
             Math.max(
@@ -1591,6 +1947,7 @@ function pdfDetectBold(
                 )
             );
 
+
         const sy =
             Math.max(
                 0,
@@ -1598,6 +1955,7 @@ function pdfDetectBold(
                     line.y0
                 )
             );
+
 
         const sw =
             Math.min(
@@ -1614,6 +1972,7 @@ function pdfDetectBold(
                     sx
             );
 
+
         const sh =
             Math.min(
 
@@ -1629,6 +1988,7 @@ function pdfDetectBold(
                     sy
             );
 
+
         if (
             sw <= 1 ||
             sh <= 1
@@ -1636,6 +1996,7 @@ function pdfDetectBold(
 
             return false;
         }
+
 
         const pixels =
             ctx.getImageData(
@@ -1645,15 +2006,20 @@ function pdfDetectBold(
                 sh
             ).data;
 
+
         let darkPixels =
             0;
+
 
         let totalPixels =
             0;
 
+
         for (
             let i = 0;
+
             i < pixels.length;
+
             i += 4
         ) {
 
@@ -1661,14 +2027,16 @@ function pdfDetectBold(
                 pixels[i];
 
             const g =
-                pixels[i + 1];
+                pixels[
+                    i + 1
+                ];
 
             const b =
-                pixels[i + 2];
+                pixels[
+                    i + 2
+                ];
 
-            /*
-             * Ignore very light pixels.
-             */
+
             if (
                 r < 130 &&
                 g < 130 &&
@@ -1678,8 +2046,10 @@ function pdfDetectBold(
                 darkPixels++;
             }
 
+
             totalPixels++;
         }
+
 
         const darkness =
             darkPixels /
@@ -1688,11 +2058,10 @@ function pdfDetectBold(
                 totalPixels
             );
 
-        /*
-         * Conservative bold detection.
-         */
+
         return (
-            darkness > 0.16
+            darkness >
+            0.16
         );
 
     } catch (
@@ -1704,44 +2073,477 @@ function pdfDetectBold(
             error
         );
 
+
         return false;
     }
 }
 
 
 /* =========================================================
-   PRESERVE SPACING
+   FIND SAFE BACKGROUND
    ========================================================= */
 
 /*
- * OCR sometimes returns multiple spaces.
+ * Instead of always painting a pure white box,
+ * sample the original page.
  *
- * We deliberately preserve them here.
- *
- * JavaScript strings preserve spaces, but PDF text
- * rendering can visually compress them depending on
- * the font.
- *
- * This function therefore converts tabs to a
- * reasonable number of spaces but leaves existing
- * multiple spaces untouched.
+ * This prevents visible white strips on colored
+ * or slightly grey document backgrounds.
  */
-function pdfPreserveSpaces(text) {
+function pdfSetSampledFill(
+    pdf,
+    canvas,
+    line
+) {
 
-    return String(
-        text || ""
-    )
-    .replace(
-        /\t/g,
-        "    "
+    const bg =
+        pdfGetBackgroundColor(
+            canvas,
+            line
+        );
+
+
+    pdf.setFillColor(
+        bg.r,
+        bg.g,
+        bg.b
     );
 }
 
 
 /* =========================================================
-   DRAW TRANSLATED TEXT
+   GET LINE WORDS
    ========================================================= */
 
+function pdfGetWordsForLine(
+    words,
+    line
+) {
+
+    if (
+        !Array.isArray(words)
+    ) {
+
+        return [];
+    }
+
+
+    const lineCenterY =
+        (
+            line.y0 +
+            line.y1
+        ) / 2;
+
+
+    const lineHeight =
+        Math.max(
+            1,
+            line.y1 -
+            line.y0
+        );
+
+
+    return words
+
+        .filter(
+            function(word) {
+
+                const wordCenterY =
+                    (
+                        word.y0 +
+                        word.y1
+                    ) / 2;
+
+
+                /*
+                 * Word must vertically belong
+                 * to this OCR line.
+                 */
+                const verticalDistance =
+                    Math.abs(
+                        wordCenterY -
+                        lineCenterY
+                    );
+
+
+                if (
+                    verticalDistance >
+                    lineHeight *
+                    0.75
+                ) {
+
+                    return false;
+                }
+
+
+                /*
+                 * Word must overlap line horizontally.
+                 */
+                if (
+                    word.x1 <
+                        line.x0 ||
+
+                    word.x0 >
+                        line.x1
+                ) {
+
+                    return false;
+                }
+
+
+                return true;
+            }
+        )
+
+        .sort(
+            function(a, b) {
+
+                return (
+                    a.x0 -
+                    b.x0
+                );
+            }
+        );
+}
+
+
+/* =========================================================
+   CALCULATE WORD SPACING
+   ========================================================= */
+
+/*
+ * Determine how much empty space existed between
+ * OCR words.
+ *
+ * This is used as a visual guide when positioning
+ * translated content.
+ */
+function pdfCalculateWordGaps(
+    words
+) {
+
+    const gaps = [];
+
+
+    for (
+        let i = 1;
+
+        i < words.length;
+
+        i++
+    ) {
+
+        const previous =
+            words[
+                i - 1
+            ];
+
+        const current =
+            words[i];
+
+
+        const gap =
+            current.x0 -
+            previous.x1;
+
+
+        gaps.push(
+            Math.max(
+                0,
+                gap
+            )
+        );
+    }
+
+
+    return gaps;
+}
+
+
+/* =========================================================
+   SPLIT TRANSLATION INTO WORDS
+   ========================================================= */
+
+function pdfSplitTranslationWords(
+    translated
+) {
+
+    /*
+     * Keep multiple spaces.
+     *
+     * We don't use split(" ") because that loses
+     * information about repeated spaces.
+     */
+    const matches =
+        String(
+            translated || ""
+        )
+        .match(
+            /\S+|\s+/g
+        );
+
+
+    if (!matches) {
+
+        return [];
+    }
+
+
+    return matches;
+}
+
+
+/* =========================================================
+   DRAW TRANSLATED WORD
+   ========================================================= */
+
+/*
+ * Draw one translated word into an allocated
+ * horizontal region.
+ */
+function pdfDrawWord(
+    pdf,
+    word,
+    x,
+    y,
+    width,
+    height,
+    fontInfo,
+    bold
+) {
+
+    const text =
+        String(
+            word || ""
+        );
+
+
+    if (
+        !text.trim()
+    ) {
+
+        return;
+    }
+
+
+    const safeWidth =
+        Math.max(
+            2,
+            width
+        );
+
+
+    const safeHeight =
+        Math.max(
+            4,
+            height
+        );
+
+
+    let fontSize =
+        Math.max(
+            PDF_MIN_FONT_SIZE,
+            Math.min(
+                PDF_MAX_FONT_SIZE,
+                safeHeight *
+                    0.82
+            )
+        );
+
+
+    pdf.setFont(
+        fontInfo.fontName,
+        "normal"
+    );
+
+
+    /*
+     * Reduce font size until the word fits.
+     */
+    while (
+        fontSize >
+            PDF_MIN_FONT_SIZE
+    ) {
+
+        pdf.setFontSize(
+            fontSize
+        );
+
+
+        let measured =
+            0;
+
+
+        try {
+
+            measured =
+                pdf.getTextWidth(
+                    text
+                );
+
+        } catch (
+            error
+        ) {
+
+            measured =
+                text.length *
+                fontSize *
+                0.50;
+        }
+
+
+        if (
+            measured <=
+            safeWidth
+        ) {
+
+            break;
+        }
+
+
+        fontSize -=
+            0.20;
+    }
+
+
+    pdf.setFontSize(
+        fontSize
+    );
+
+
+    let measuredWidth =
+        0;
+
+
+    try {
+
+        measuredWidth =
+            pdf.getTextWidth(
+                text
+            );
+
+    } catch (
+        error
+    ) {
+
+        measuredWidth =
+            text.length *
+            fontSize *
+            0.50;
+    }
+
+
+    /*
+     * Last safety reduction.
+     */
+    if (
+        measuredWidth >
+        safeWidth
+    ) {
+
+        const ratio =
+            safeWidth /
+            Math.max(
+                1,
+                measuredWidth
+            );
+
+
+        fontSize =
+            Math.max(
+                PDF_MIN_FONT_SIZE,
+                fontSize *
+                    ratio
+            );
+
+
+        pdf.setFontSize(
+            fontSize
+        );
+    }
+
+
+    /*
+     * Vertically center.
+     */
+    const textY =
+        y +
+        (
+            safeHeight -
+            fontSize
+        ) / 2 +
+        fontSize *
+            0.82;
+
+
+    pdf.setTextColor(
+        0,
+        0,
+        0
+    );
+
+
+    /*
+     * Normal text.
+     */
+    pdf.text(
+        text,
+        x,
+        textY,
+        {
+            baseline:
+                "alphabetic"
+        }
+    );
+
+
+    /*
+     * Approximate bold.
+     */
+    if (bold) {
+
+        const offset =
+            Math.max(
+                0.08,
+                Math.min(
+                    0.25,
+                    fontSize *
+                        0.014
+                )
+            );
+
+
+        pdf.text(
+            text,
+            x +
+                offset,
+            textY,
+            {
+                baseline:
+                    "alphabetic"
+            }
+        );
+    }
+}
+
+
+/* =========================================================
+   DRAW TRANSLATED LINE
+   ========================================================= */
+
+/*
+ * This version does NOT create a large white rectangle
+ * around the whole line.
+ *
+ * Instead:
+ *
+ * 1. Determine the original OCR word positions.
+ * 2. Determine the translated words.
+ * 3. Give translated words their own areas.
+ * 4. Only cover the actual original text region.
+ *
+ * This dramatically reduces white strips and overlap.
+ */
 function pdfDrawTranslatedText(
     pdf,
     canvas,
@@ -1749,7 +2551,8 @@ function pdfDrawTranslatedText(
     translated,
     pageWidth,
     pageHeight,
-    fontInfo
+    fontInfo,
+    lineWords
 ) {
 
     if (
@@ -1759,51 +2562,664 @@ function pdfDrawTranslatedText(
         ).trim()
     ) {
 
-        return;
+        return false;
     }
 
-
-    /* =====================================================
-       SCALE
-       ===================================================== */
 
     const scale =
         PDF_RENDER_SCALE;
 
 
-    /* =====================================================
-       ORIGINAL OCR POSITION
-       ===================================================== */
+    /*
+     * Original line position.
+     */
+    const x0 =
+        Number(
+            line.x0 || 0
+        );
+
+
+    const y0 =
+        Number(
+            line.y0 || 0
+        );
+
+
+    const x1 =
+        Number(
+            line.x1 || 0
+        );
+
+
+    const y1 =
+        Number(
+            line.y1 || 0
+        );
+
+
+    if (
+        x1 <= x0 ||
+        y1 <= y0
+    ) {
+
+        return false;
+    }
+
+
+    /*
+     * Convert to PDF points.
+     */
+    const pdfX =
+        x0 / scale;
+
+
+    const pdfY =
+        y0 / scale;
+
+
+    const pdfWidth =
+        (
+            x1 -
+            x0
+        ) / scale;
+
+
+    const pdfHeight =
+        (
+            y1 -
+            y0
+        ) / scale;
+
+
+    if (
+        pdfWidth <= 2 ||
+        pdfHeight <= 2
+    ) {
+
+        return false;
+    }
+
+
+    /*
+     * Translation.
+     */
+    const translatedText =
+        String(
+            translated
+        ).trim();
+
+
+    if (!translatedText) {
+
+        return false;
+    }
+
+
+    /*
+     * Detect bold from original line.
+     */
+    const isBold =
+        pdfDetectBold(
+            canvas,
+            line
+        );
+
+
+    /*
+     * -----------------------------------------------------
+     * IMPORTANT SAFETY:
+     *
+     * If OCR has no word positions, use the old
+     * line-level fallback.
+     * -----------------------------------------------------
+     */
+    if (
+        !Array.isArray(
+            lineWords
+        ) ||
+        lineWords.length === 0
+    ) {
+
+        return pdfDrawTranslatedLineFallback(
+            pdf,
+            canvas,
+            line,
+            translatedText,
+            pageWidth,
+            pageHeight,
+            fontInfo,
+            isBold
+        );
+    }
+
+
+    /*
+     * Original word coordinates.
+     */
+    const originalWords =
+        lineWords
+            .filter(
+                function(word) {
+
+                    return (
+                        word &&
+                        word.text &&
+                        word.x1 >
+                            word.x0
+                    );
+                }
+            )
+            .sort(
+                function(a, b) {
+
+                    return (
+                        a.x0 -
+                        b.x0
+                    );
+                }
+            );
+
+
+    if (
+        originalWords.length === 0
+    ) {
+
+        return pdfDrawTranslatedLineFallback(
+            pdf,
+            canvas,
+            line,
+            translatedText,
+            pageWidth,
+            pageHeight,
+            fontInfo,
+            isBold
+        );
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * BACKGROUND COVER
+     * -----------------------------------------------------
+     *
+     * IMPORTANT:
+     * Cover only the actual line.
+     *
+     * Do NOT expand to neighbouring OCR lines.
+     */
+    const padding =
+        PDF_COVER_PADDING;
+
+
+    const coverX =
+        Math.max(
+            0,
+            pdfX -
+                padding
+        );
+
+
+    const coverY =
+        Math.max(
+            0,
+            pdfY -
+                padding
+        );
+
+
+    const coverWidth =
+        Math.min(
+            pdfWidth +
+                padding * 2,
+
+            pageWidth -
+                coverX
+        );
+
+
+    const coverHeight =
+        Math.min(
+            pdfHeight +
+                padding * 2,
+
+            pageHeight -
+                coverY
+        );
+
+
+    /*
+     * Sample original background.
+     */
+    pdfSetSampledFill(
+        pdf,
+        canvas,
+        line
+    );
+
+
+    pdf.rect(
+        coverX,
+        coverY,
+        coverWidth,
+        coverHeight,
+        "F"
+    );
+
+
+    /*
+     * -----------------------------------------------------
+     * TRANSLATED WORDS
+     * -----------------------------------------------------
+     */
+
+    const translatedTokens =
+        pdfSplitTranslationWords(
+            translatedText
+        );
+
+
+    /*
+     * If translation has only one token, draw it
+     * across the complete original line.
+     */
+    const nonSpaceTokens =
+        translatedTokens.filter(
+            function(token) {
+
+                return (
+                    /\S/.test(
+                        token
+                    )
+                );
+            }
+        );
+
+
+    if (
+        nonSpaceTokens.length === 0
+    ) {
+
+        return false;
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * WORD-LEVEL LAYOUT
+     * -----------------------------------------------------
+     *
+     * We use the original word widths as a proportional
+     * reference.
+     */
+    const originalWordWidths =
+        originalWords.map(
+            function(word) {
+
+                return Math.max(
+                    1,
+                    (
+                        word.x1 -
+                        word.x0
+                    )
+                );
+            }
+        );
+
+
+    let totalOriginalWidth =
+        originalWordWidths.reduce(
+            function(sum, value) {
+
+                return (
+                    sum +
+                    value
+                );
+            },
+            0
+        );
+
+
+    /*
+     * Add original gaps.
+     */
+    const originalGaps =
+        pdfCalculateWordGaps(
+            originalWords
+        );
+
+
+    const totalOriginalGaps =
+        originalGaps.reduce(
+            function(sum, value) {
+
+                return (
+                    sum +
+                    value
+                );
+            },
+            0
+        );
+
+
+    totalOriginalWidth +=
+        totalOriginalGaps;
+
+
+    /*
+     * If there are more translated words than original
+     * words, distribute the complete line width.
+     */
+    const targetWordCount =
+        nonSpaceTokens.length;
+
+
+    const allocatedWidths =
+        [];
+
+
+    if (
+        targetWordCount <=
+        originalWords.length
+    ) {
+
+        /*
+         * Use original word proportions.
+         */
+        const proportions =
+            originalWordWidths
+                .slice(
+                    0,
+                    targetWordCount
+                );
+
+
+        const proportionTotal =
+            proportions.reduce(
+                function(sum, value) {
+
+                    return (
+                        sum +
+                        value
+                    );
+                },
+                0
+            );
+
+
+        for (
+            let i = 0;
+
+            i <
+            targetWordCount;
+
+            i++
+        ) {
+
+            allocatedWidths.push(
+
+                pdfWidth *
+                (
+                    proportions[i] /
+                    Math.max(
+                        1,
+                        proportionTotal
+                    )
+                )
+            );
+        }
+
+    } else {
+
+        /*
+         * More translated words than original words.
+         *
+         * Divide based on translated word lengths,
+         * while still keeping everything inside the
+         * original OCR line.
+         */
+        const translatedLengths =
+            nonSpaceTokens.map(
+                function(token) {
+
+                    return Math.max(
+                        1,
+                        token.length
+                    );
+                }
+            );
+
+
+        const totalTranslatedLength =
+            translatedLengths.reduce(
+                function(sum, value) {
+
+                    return (
+                        sum +
+                        value
+                    );
+                },
+                0
+            );
+
+
+        for (
+            let i = 0;
+
+            i <
+            targetWordCount;
+
+            i++
+        ) {
+
+            allocatedWidths.push(
+
+                pdfWidth *
+                (
+                    translatedLengths[i] /
+                    Math.max(
+                        1,
+                        totalTranslatedLength
+                    )
+                )
+            );
+        }
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * DRAW TRANSLATED WORDS
+     * -----------------------------------------------------
+     */
+
+    let currentX =
+        coverX;
+
+
+    let wordIndex =
+        0;
+
+
+    for (
+        const token of translatedTokens
+    ) {
+
+        /*
+         * Space token.
+         */
+        if (
+            !/\S/.test(
+                token
+            )
+        ) {
+
+            /*
+             * Preserve a proportional visual gap.
+             *
+             * We don't simply throw the spaces away.
+             */
+            const averageSpace =
+                Math.max(
+                    1,
+                    pdfHeight *
+                    0.22
+                );
+
+
+            currentX +=
+                averageSpace *
+                Math.max(
+                    1,
+                    token.length
+                );
+
+
+            continue;
+        }
+
+
+        if (
+            wordIndex >=
+            allocatedWidths.length
+        ) {
+
+            break;
+        }
+
+
+        const wordWidth =
+            allocatedWidths[
+                wordIndex
+            ];
+
+
+        /*
+         * Prevent word from leaving line.
+         */
+        const safeWordWidth =
+            Math.max(
+                2,
+                Math.min(
+                    wordWidth,
+                    coverX +
+                        coverWidth -
+                        currentX
+                )
+            );
+
+
+        pdfDrawWord(
+
+            pdf,
+
+            token,
+
+            currentX,
+
+            coverY,
+
+            safeWordWidth,
+
+            coverHeight,
+
+            fontInfo,
+
+            isBold
+        );
+
+
+        currentX +=
+            safeWordWidth;
+
+
+        wordIndex++;
+    }
+
+
+    console.log(
+        "[PDF WORD LAYOUT]",
+        {
+
+            original:
+                line.text,
+
+            translated:
+                translatedText,
+
+            words:
+                originalWords.length,
+
+            translatedWords:
+                targetWordCount,
+
+            font:
+                fontInfo.fontName,
+
+            bold:
+                isBold
+        }
+    );
+
+
+    return true;
+}
+
+
+/* =========================================================
+   FALLBACK LINE DRAW
+   ========================================================= */
+
+function pdfDrawTranslatedLineFallback(
+    pdf,
+    canvas,
+    line,
+    translatedText,
+    pageWidth,
+    pageHeight,
+    fontInfo,
+    isBold
+) {
+
+    const scale =
+        PDF_RENDER_SCALE;
+
 
     const x =
         Number(
             line.x0 || 0
         ) / scale;
 
+
     const y =
         Number(
             line.y0 || 0
         ) / scale;
 
+
     const width =
         Math.max(
             4,
-            Number(
-                line.x1 || 0
-            ) -
-            Number(
-                line.x0 || 0
+            (
+                Number(
+                    line.x1 || 0
+                ) -
+                Number(
+                    line.x0 || 0
+                )
             )
         ) / scale;
+
 
     const height =
         Math.max(
             4,
-            Number(
-                line.y1 || 0
-            ) -
-            Number(
-                line.y0 || 0
+            (
+                Number(
+                    line.y1 || 0
+                ) -
+                Number(
+                    line.y0 || 0
+                )
             )
         ) / scale;
 
@@ -1813,120 +3229,65 @@ function pdfDrawTranslatedText(
         height <= 2
     ) {
 
-        return;
+        return false;
     }
 
-
-    /* =====================================================
-       TEXT
-       ===================================================== */
-
-    const originalText =
-        String(
-            line.text || ""
-        )
-        .replace(
-            /^[\t ]+/,
-            ""
-        )
-        .replace(
-            /[\t ]+$/,
-            ""
-        );
-
-    /*
-     * Keep translation spaces.
-     *
-     * IMPORTANT:
-     * We do NOT use:
-     *
-     * replace(/\s+/g, " ")
-     */
-    const translatedText =
-        pdfPreserveSpaces(
-            translated
-        )
-        .trim();
-
-
-    if (!translatedText) {
-
-        return;
-    }
-
-
-    /* =====================================================
-       PADDING
-       ===================================================== */
 
     const padding =
-        Math.max(
-            1,
-            Math.min(
-                2.5,
-                height * 0.07
+        Math.min(
+            1.5,
+            Math.max(
+                0.5,
+                height *
+                0.05
             )
         );
 
 
-    /* =====================================================
-       ORIGINAL TEXT BOX
-       ===================================================== */
-
     const boxX =
         Math.max(
             0,
-            x - padding
+            x -
+                padding
         );
+
 
     const boxY =
         Math.max(
             0,
-            y - padding
+            y -
+                padding
         );
+
 
     const boxWidth =
         Math.min(
             width +
                 padding * 2,
-
             pageWidth -
                 boxX
         );
+
 
     const boxHeight =
         Math.min(
             height +
                 padding * 2,
-
             pageHeight -
                 boxY
         );
 
 
-    /* =====================================================
-       BACKGROUND
-       ===================================================== */
-
-    const bg =
-        pdfGetBackgroundColor(
-            canvas,
-            line
-        );
-
-    pdf.setFillColor(
-        bg.r,
-        bg.g,
-        bg.b
+    /*
+     * Sampled background.
+     */
+    pdfSetSampledFill(
+        pdf,
+        canvas,
+        line
     );
 
-    /*
-     * Cover only the original OCR region.
-     *
-     * This is intentionally NOT expanded to the next
-     * line because doing so causes neighbouring text
-     * to disappear.
-     */
+
     pdf.rect(
         boxX,
         boxY,
@@ -1936,283 +3297,94 @@ function pdfDrawTranslatedText(
     );
 
 
-    /* =====================================================
-       FONT
-       ===================================================== */
-
     pdf.setFont(
         fontInfo.fontName,
         "normal"
     );
 
 
-    /* =====================================================
-       AVAILABLE AREA
-       ===================================================== */
-
-    const availableWidth =
-        Math.max(
-            8,
-            boxWidth -
-                padding * 2
-        );
-
-    const availableHeight =
-        Math.max(
-            8,
-            boxHeight -
-                padding * 2
-        );
-
-
-    /* =====================================================
-       START FONT SIZE
-       ===================================================== */
-
     let fontSize =
         Math.max(
-            5.5,
+            PDF_MIN_FONT_SIZE,
             Math.min(
-                28,
-                height * 0.82
+                PDF_MAX_FONT_SIZE,
+                height *
+                    0.82
             )
         );
 
 
-    /* =====================================================
-       TRANSLATION LENGTH
-       ===================================================== */
-
-    const originalLength =
+    const availableWidth =
         Math.max(
-            1,
-            originalText.length
+            5,
+            boxWidth -
+                padding * 2
         );
-
-    const translatedLength =
-        Math.max(
-            1,
-            translatedText.length
-        );
-
-    const lengthRatio =
-        translatedLength /
-        originalLength;
 
 
     /*
-     * Only a gentle reduction.
-     *
-     * The actual width measurement below decides
-     * the final font size.
+     * Fit complete translation.
      */
-    if (
-        lengthRatio > 1.5
-    ) {
-
-        fontSize *=
-            0.96;
-    }
-
-    if (
-        lengthRatio > 2.0
-    ) {
-
-        fontSize *=
-            0.93;
-    }
-
-    if (
-        lengthRatio > 3.0
-    ) {
-
-        fontSize *=
-            0.90;
-    }
-
-
-    /* =====================================================
-       TEXT WIDTH MEASUREMENT
-       ===================================================== */
-
-    function getTextWidth(
-        size
+    while (
+        fontSize >
+            PDF_MIN_FONT_SIZE
     ) {
 
         pdf.setFontSize(
-            size
+            fontSize
         );
+
+
+        let measured =
+            0;
+
 
         try {
 
-            return pdf.getTextWidth(
-                translatedText
-            );
+            measured =
+                pdf.getTextWidth(
+                    translatedText
+                );
 
         } catch (
             error
         ) {
 
-            /*
-             * Fallback.
-             *
-             * Spaces are deliberately included.
-             */
-            return (
+            measured =
                 translatedText.length *
-                size *
-                0.52
-            );
+                fontSize *
+                0.50;
         }
-    }
 
 
-    /* =====================================================
-       FIT TEXT WITHOUT WRAPPING
-       ===================================================== */
-
-    let fittedFontSize =
-        fontSize;
-
-
-    /*
-     * We never wrap an OCR line.
-     *
-     * Wrapping creates another visual line and is the
-     * biggest cause of overlap with the following OCR line.
-     */
-    while (
-        fittedFontSize >
-            5.5 &&
-
-        getTextWidth(
-            fittedFontSize
-        ) >
+        if (
+            measured <=
             availableWidth
-    ) {
+        ) {
 
-        fittedFontSize -=
+            break;
+        }
+
+
+        fontSize -=
             0.20;
     }
 
 
-    /* =====================================================
-       EXACT WIDTH-BASED ADJUSTMENT
-       ===================================================== */
-
-    let measuredWidth =
-        getTextWidth(
-            fittedFontSize
-        );
-
-
-    if (
-        measuredWidth >
-        availableWidth
-    ) {
-
-        const ratio =
-            availableWidth /
-            Math.max(
-                1,
-                measuredWidth
-            );
-
-        fittedFontSize =
-            fittedFontSize *
-            Math.max(
-                0.55,
-                Math.min(
-                    1,
-                    ratio
-                )
-            );
-    }
-
-
-    /* =====================================================
-       HEIGHT LIMIT
-       ===================================================== */
-
-    const maxHeightFontSize =
-        availableHeight *
-        0.88;
-
-    fittedFontSize =
-        Math.min(
-            fittedFontSize,
-            maxHeightFontSize
-        );
-
-
-    fittedFontSize =
-        Math.max(
-            5.5,
-            Math.min(
-                28,
-                fittedFontSize
-            )
-        );
-
-
-    /* =====================================================
-       FINAL WIDTH CHECK
-       ===================================================== */
-
     pdf.setFontSize(
-        fittedFontSize
+        fontSize
     );
 
-    measuredWidth =
-        getTextWidth(
-            fittedFontSize
-        );
 
+    const textY =
+        boxY +
+        (
+            boxHeight -
+            fontSize
+        ) / 2 +
+        fontSize *
+            0.82;
 
-    if (
-        measuredWidth >
-        availableWidth
-    ) {
-
-        const finalRatio =
-            availableWidth /
-            Math.max(
-                1,
-                measuredWidth
-            );
-
-        fittedFontSize =
-            Math.max(
-                5.5,
-                fittedFontSize *
-                finalRatio
-            );
-
-        pdf.setFontSize(
-            fittedFontSize
-        );
-
-        measuredWidth =
-            getTextWidth(
-                fittedFontSize
-            );
-    }
-
-
-    /* =====================================================
-       BOLD DETECTION
-       ===================================================== */
-
-    const isBold =
-        pdfDetectBold(
-            canvas,
-            line
-        );
-
-
-    /* =====================================================
-       TEXT COLOR
-       ===================================================== */
 
     pdf.setTextColor(
         0,
@@ -2221,92 +3393,14 @@ function pdfDrawTranslatedText(
     );
 
 
-    pdf.setFont(
-        fontInfo.fontName,
-        "normal"
-    );
-
-
-    pdf.setFontSize(
-        fittedFontSize
-    );
-
-
-    /* =====================================================
-       HORIZONTAL POSITION
-       ===================================================== */
-
-    /*
-     * Keep the translated text at the same left position
-     * as the original OCR text.
-     */
-    let textX =
-        boxX +
-        padding;
-
-
-    /*
-     * If somehow the text is still slightly too wide,
-     * move it only inside the box.
-     */
-    if (
-        textX +
-            measuredWidth >
-        pageWidth
-    ) {
-
-        textX =
-            Math.max(
-                0,
-                pageWidth -
-                    measuredWidth -
-                    padding
-            );
-    }
-
-
-    /* =====================================================
-       VERTICAL POSITION
-       ===================================================== */
-
-    /*
-     * Center text vertically in the original OCR box.
-     *
-     * This prevents the translated text from drifting
-     * too high or too low.
-     */
-    const textY =
-        boxY +
-        (
-            boxHeight -
-            fittedFontSize
-        ) / 2 +
-        fittedFontSize *
-            0.82;
-
-
-    /* =====================================================
-       PAGE BOUNDARY PROTECTION
-       ===================================================== */
-
-    const safeTextY =
-        Math.max(
-            fittedFontSize,
-            Math.min(
-                pageHeight - 1,
-                textY
-            )
-        );
-
-
-    /* =====================================================
-       DRAW NORMAL TEXT
-       ===================================================== */
-
     pdf.text(
         translatedText,
-        textX,
-        safeTextY,
+        boxX +
+            padding,
+        Math.min(
+            pageHeight - 1,
+            textY
+        ),
         {
             baseline:
                 "alphabetic"
@@ -2314,49 +3408,30 @@ function pdfDrawTranslatedText(
     );
 
 
-    /* =====================================================
-       SIMULATED BOLD
-       ===================================================== */
-
     if (
         isBold
     ) {
 
-        /*
-         * Very small offsets.
-         *
-         * This makes the translated text look heavier
-         * without making it noticeably larger.
-         */
-        const boldOffset =
+        const offset =
             Math.max(
-                0.10,
+                0.08,
                 Math.min(
-                    0.28,
-                    fittedFontSize *
-                        0.016
+                    0.25,
+                    fontSize *
+                        0.014
                 )
             );
 
 
         pdf.text(
             translatedText,
-            textX +
-                boldOffset,
-            safeTextY,
-            {
-                baseline:
-                    "alphabetic"
-            }
-        );
-
-
-        pdf.text(
-            translatedText,
-            textX,
-            safeTextY +
-                boldOffset *
-                0.30,
+            boxX +
+                padding +
+                offset,
+            Math.min(
+                pageHeight - 1,
+                textY
+            ),
             {
                 baseline:
                     "alphabetic"
@@ -2365,83 +3440,7 @@ function pdfDrawTranslatedText(
     }
 
 
-    /* =====================================================
-       DEBUG
-       ===================================================== */
-
-    console.log(
-        "[PDF TEXT]",
-        {
-
-            original:
-                originalText,
-
-            translated:
-                translatedText,
-
-            originalPosition: {
-
-                x0:
-                    line.x0,
-
-                y0:
-                    line.y0,
-
-                x1:
-                    line.x1,
-
-                y1:
-                    line.y1
-            },
-
-            pdfBox: {
-
-                x:
-                    Number(
-                        boxX.toFixed(2)
-                    ),
-
-                y:
-                    Number(
-                        boxY.toFixed(2)
-                    ),
-
-                width:
-                    Number(
-                        boxWidth.toFixed(2)
-                    ),
-
-                height:
-                    Number(
-                        boxHeight.toFixed(2)
-                    )
-            },
-
-            fontSize:
-                Number(
-                    fittedFontSize.toFixed(
-                        2
-                    )
-                ),
-
-            textWidth:
-                Number(
-                    measuredWidth.toFixed(
-                        2
-                    )
-                ),
-
-            availableWidth:
-                Number(
-                    availableWidth.toFixed(
-                        2
-                    )
-                ),
-
-            bold:
-                isBold
-        }
-    );
+    return true;
 }
 
 
@@ -2456,6 +3455,7 @@ async function pdfProcessFile(
     pdfClearError();
 
     pdfHideProgress();
+
 
     if (!file) {
 
@@ -2500,13 +3500,16 @@ async function pdfProcessFile(
             const message =
                 "Translation not available for this language. Please try Hindi, Gujarati or Marathi.";
 
+
             pdfShowError(
                 message
             );
 
+
             pdfSetTranslationStatus(
                 message
             );
+
 
             return;
         }
@@ -2519,8 +3522,10 @@ async function pdfProcessFile(
         const sourceLanguage =
             pdfGetSourceLanguage();
 
+
         const targetLanguage =
             pdfGetTargetLanguage();
+
 
         const ocrLanguage =
             pdfGetOCRLanguage();
@@ -2530,29 +3535,35 @@ async function pdfProcessFile(
             "===================================="
         );
 
+
         console.log(
             "PDF PROCESSING"
         );
+
 
         console.log(
             "Source:",
             sourceLanguage
         );
 
+
         console.log(
             "Target:",
             targetLanguage
         );
+
 
         console.log(
             "OCR:",
             ocrLanguage
         );
 
+
         console.log(
             "Font:",
             fontInfo.fontFile
         );
+
 
         console.log(
             "===================================="
@@ -2566,6 +3577,7 @@ async function pdfProcessFile(
         pdfSetStatus(
             `🔤 Loading ${fontInfo.name} PDF font...`
         );
+
 
         pdfSetTranslationStatus(
             `Loading ${fontInfo.name} PDF font...`
@@ -2622,6 +3634,7 @@ async function pdfProcessFile(
         const firstPageWidth =
             firstViewport.width;
 
+
         const firstPageHeight =
             firstViewport.height;
 
@@ -2655,7 +3668,7 @@ async function pdfProcessFile(
         try {
 
             /* =============================================
-               PROCESS EVERY PAGE
+               PROCESS PAGES
                ============================================= */
 
             for (
@@ -2671,9 +3684,11 @@ async function pdfProcessFile(
                     "===================================="
                 );
 
+
                 console.log(
                     `PAGE ${pageNumber}/${totalPages}`
                 );
+
 
                 console.log(
                     "===================================="
@@ -2681,7 +3696,7 @@ async function pdfProcessFile(
 
 
                 /* =========================================
-                   PAGE
+                   GET PAGE
                    ========================================= */
 
                 const page =
@@ -2704,12 +3719,13 @@ async function pdfProcessFile(
                 const pageWidth =
                     pageViewport.width;
 
+
                 const pageHeight =
                     pageViewport.height;
 
 
                 /* =========================================
-                   ADD PAGE
+                   ADD OUTPUT PAGE
                    ========================================= */
 
                 if (
@@ -2717,6 +3733,7 @@ async function pdfProcessFile(
                 ) {
 
                     outputPdf.addPage(
+
                         [
                             pageWidth,
                             pageHeight
@@ -2730,6 +3747,7 @@ async function pdfProcessFile(
                             : "portrait"
                     );
 
+
                     outputPdf.setFont(
                         fontInfo.fontName,
                         "normal"
@@ -2738,7 +3756,7 @@ async function pdfProcessFile(
 
 
                 /* =========================================
-                   RENDER PAGE
+                   RENDER
                    ========================================= */
 
                 pdfSetStatus(
@@ -2767,14 +3785,26 @@ async function pdfProcessFile(
                     );
 
 
+                /*
+                 * Original page remains the complete
+                 * background.
+                 */
                 outputPdf.addImage(
+
                     imageData,
+
                     "JPEG",
+
                     0,
+
                     0,
+
                     pageWidth,
+
                     pageHeight,
+
                     undefined,
+
                     "FAST"
                 );
 
@@ -2785,15 +3815,35 @@ async function pdfProcessFile(
 
                 const ocrData =
                     await pdfOCRPage(
+
                         worker,
+
                         canvas,
+
                         pageNumber,
+
                         totalPages
                     );
 
 
                 /* =========================================
-                   OCR LINES
+                   GET WORDS
+                   ========================================= */
+
+                const words =
+                    pdfGetOCRWords(
+                        ocrData
+                    );
+
+
+                console.log(
+                    `OCR words found on page ${pageNumber}:`,
+                    words.length
+                );
+
+
+                /* =========================================
+                   GET LINES
                    ========================================= */
 
                 const lines =
@@ -2834,12 +3884,16 @@ async function pdfProcessFile(
 
 
                 /* =========================================
-                   TRANSLATE LINES
+                   TRANSLATED LINES
                    ========================================= */
 
                 const translatedLines =
                     [];
 
+
+                /* =========================================
+                   TRANSLATE
+                   ========================================= */
 
                 for (
                     let i = 0;
@@ -2875,6 +3929,23 @@ async function pdfProcessFile(
                             );
 
 
+                        /*
+                         * Make sure translation actually
+                         * contains usable text.
+                         */
+                        if (
+                            !translated ||
+                            !String(
+                                translated
+                            ).trim()
+                        ) {
+
+                            throw new Error(
+                                "Empty translation"
+                            );
+                        }
+
+
                         console.log(
                             "Translated:",
                             line.text,
@@ -2887,18 +3958,25 @@ async function pdfProcessFile(
                     ) {
 
                         console.error(
-                            "Translation failed for line:",
+                            "Translation failed:",
                             line.text,
                             translationError
                         );
 
 
                         /*
-                         * Keep original text if translation
-                         * fails, exactly as before.
+                         * IMPORTANT:
+                         *
+                         * Do NOT draw anything over this line.
+                         *
+                         * The original page image underneath
+                         * remains untouched.
+                         *
+                         * This eliminates the white strip
+                         * problem when translation fails.
                          */
                         translated =
-                            line.text;
+                            null;
                     }
 
 
@@ -2984,22 +4062,76 @@ async function pdfProcessFile(
                     of translatedLines
                 ) {
 
-                    pdfDrawTranslatedText(
+                    /*
+                     * NEVER overwrite the original text
+                     * if translation failed.
+                     */
+                    if (
+                        !item.translated ||
+                        !String(
+                            item.translated
+                        ).trim()
+                    ) {
 
-                        outputPdf,
+                        console.warn(
+                            "Skipping untranslated line:",
+                            item.text
+                        );
 
-                        canvas,
+                        continue;
+                    }
 
-                        item,
 
-                        item.translated,
+                    /*
+                     * Get words belonging to this line.
+                     */
+                    const lineWords =
+                        pdfGetWordsForLine(
+                            words,
+                            item
+                        );
 
-                        pageWidth,
 
-                        pageHeight,
+                    try {
 
-                        fontInfo
-                    );
+                        pdfDrawTranslatedText(
+
+                            outputPdf,
+
+                            canvas,
+
+                            item,
+
+                            item.translated,
+
+                            pageWidth,
+
+                            pageHeight,
+
+                            fontInfo,
+
+                            lineWords
+                        );
+
+                    } catch (
+                        drawError
+                    ) {
+
+                        console.error(
+                            "Could not draw translated line:",
+                            item.text,
+                            drawError
+                        );
+
+                        /*
+                         * IMPORTANT:
+                         *
+                         * Do nothing else.
+                         *
+                         * The original page image remains
+                         * visible underneath.
+                         */
+                    }
                 }
 
 
@@ -3027,6 +4159,7 @@ async function pdfProcessFile(
             try {
 
                 await worker.terminate();
+
 
                 console.log(
                     "Tesseract worker terminated."
@@ -3078,7 +4211,7 @@ async function pdfProcessFile(
 
 
         /* =================================================
-           OUTPUT FILE NAME
+           OUTPUT NAME
            ================================================= */
 
         const baseName =
@@ -3144,14 +4277,17 @@ async function pdfProcessFile(
             "===================================="
         );
 
+
         console.log(
             "PDF PROCESSING COMPLETED"
         );
+
 
         console.log(
             "Output:",
             outputName
         );
+
 
         console.log(
             "===================================="
@@ -3175,13 +4311,16 @@ async function pdfProcessFile(
             "===================================="
         );
 
+
         console.error(
             "PDF PROCESSING ERROR"
         );
 
+
         console.error(
             error
         );
+
 
         console.error(
             "===================================="
@@ -3233,9 +4372,11 @@ if (pdfInput) {
                 "===================================="
             );
 
+
             console.log(
                 "PDF FILE CHANGE EVENT FIRED"
             );
+
 
             console.log(
                 "===================================="
