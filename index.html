@@ -586,7 +586,6 @@
 ></script>
 
 
-
 <!-- =====================================================
      PDF.JS
      ===================================================== -->
@@ -596,41 +595,81 @@
 ></script>
 
 
-
-<!-- =====================================================
-     PDF.JS WORKER
-     
-     pdf.js will use this worker automatically through
-     pdf.js configuration inside pdf.js
-     ===================================================== -->
-
-
-
 <!-- =====================================================
      JSPDF
      ===================================================== -->
 
 <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
 ></script>
 
+
+<!-- =====================================================
+     LIBRARY CHECK
+     ===================================================== -->
+
+<script>
+    console.log("====================================");
+    console.log("Dhiren Translate library check");
+    console.log("====================================");
+
+    console.log(
+        "Tesseract:",
+        typeof window.Tesseract
+    );
+
+    console.log(
+        "PDF.js:",
+        typeof window.pdfjsLib
+    );
+
+    console.log(
+        "jsPDF window.jspdf:",
+        typeof window.jspdf
+    );
+
+    console.log(
+        "jsPDF constructor:",
+        typeof window.jspdf?.jsPDF
+    );
+
+    if (
+        typeof window.jspdf === "undefined"
+    ) {
+
+        console.error(
+            "❌ jsPDF FAILED TO LOAD"
+        );
+
+    } else if (
+        typeof window.jspdf.jsPDF !== "function"
+    ) {
+
+        console.error(
+            "❌ jsPDF constructor NOT FOUND"
+        );
+
+    } else {
+
+        console.log(
+            "✅ jsPDF loaded successfully"
+        );
+
+    }
+
+    console.log("====================================");
+</script>
 
 
 <!-- =====================================================
      EXISTING APPLICATION
-     
-     IMPORTANT:
-     app.js is NOT changed.
      ===================================================== -->
 
 <script src="/app.js"></script>
 
 
-
 <!-- =====================================================
-     PDF OCR + TRANSLATION
-     
-     New independent module.
+     PDF OCR + TRANSLATION MODULE
      ===================================================== -->
 
 <script src="/pdf.js"></script>
