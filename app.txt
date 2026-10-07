@@ -2,30 +2,42 @@
 
 
 /*
- * Dhiren Translate
+ * =========================================================
+ * DHIREN TRANSLATE
+ * =========================================================
  *
- * IMPORTANT:
- * This frontend uses the existing API.
- *
- * API format:
+ * Translation API:
  *
  * /api/?sl=en&tl=hi&q=Hello
  *
- * Do NOT put /api inside another API path.
+ * Image OCR:
+ *
+ * Image
+ *   ↓
+ * Tesseract.js
+ *   ↓
+ * Extract text
+ *   ↓
+ * sourceText
+ *   ↓
+ * Translate
+ *
+ * =========================================================
  */
 
 
 const API_URL = "/api/";
 
 
+
 /*
- * Supported languages.
- *
- * The codes are the language codes normally accepted by
- * Google Translate based translation services.
+ * =========================================================
+ * LANGUAGES
+ * =========================================================
  */
 
 const LANGUAGES = [
+
     ["af", "Afrikaans"],
     ["sq", "Albanian"],
     ["am", "Amharic"],
@@ -155,57 +167,141 @@ const LANGUAGES = [
     ["yi", "Yiddish"],
     ["yo", "Yoruba"],
     ["zu", "Zulu"]
+
 ];
 
 
+
+/*
+ * =========================================================
+ * DOM
+ * =========================================================
+ */
+
 const sourceLanguage =
-    document.getElementById("sourceLanguage");
+    document.getElementById(
+        "sourceLanguage"
+    );
+
 
 const targetLanguage =
-    document.getElementById("targetLanguage");
+    document.getElementById(
+        "targetLanguage"
+    );
+
 
 const sourceText =
-    document.getElementById("sourceText");
+    document.getElementById(
+        "sourceText"
+    );
+
 
 const translationResult =
-    document.getElementById("translationResult");
+    document.getElementById(
+        "translationResult"
+    );
+
 
 const translateButton =
-    document.getElementById("translateButton");
+    document.getElementById(
+        "translateButton"
+    );
+
 
 const translateButtonText =
-    document.getElementById("translateButtonText");
+    document.getElementById(
+        "translateButtonText"
+    );
+
 
 const translateSpinner =
-    document.getElementById("translateSpinner");
+    document.getElementById(
+        "translateSpinner"
+    );
+
 
 const swapButton =
-    document.getElementById("swapButton");
+    document.getElementById(
+        "swapButton"
+    );
+
 
 const clearButton =
-    document.getElementById("clearButton");
+    document.getElementById(
+        "clearButton"
+    );
+
 
 const copyButton =
-    document.getElementById("copyButton");
+    document.getElementById(
+        "copyButton"
+    );
+
 
 const characterCount =
-    document.getElementById("characterCount");
+    document.getElementById(
+        "characterCount"
+    );
+
 
 const translationStatus =
-    document.getElementById("translationStatus");
+    document.getElementById(
+        "translationStatus"
+    );
+
 
 const errorMessage =
-    document.getElementById("errorMessage");
+    document.getElementById(
+        "errorMessage"
+    );
+
 
 const mobileMenuButton =
-    document.getElementById("mobileMenuButton");
+    document.getElementById(
+        "mobileMenuButton"
+    );
+
 
 const mobileNav =
-    document.getElementById("mobileNav");
+    document.getElementById(
+        "mobileNav"
+    );
+
 
 
 /*
- * Create language options.
+ * OCR
+ */
+
+const imageInput =
+    document.getElementById(
+        "imageInput"
+    );
+
+
+const ocrStatus =
+    document.getElementById(
+        "ocrStatus"
+    );
+
+
+const ocrProgressContainer =
+    document.getElementById(
+        "ocrProgressContainer"
+    );
+
+
+const ocrProgress =
+    document.getElementById(
+        "ocrProgress"
+    );
+
+
+
+/*
+ * =========================================================
+ * POPULATE LANGUAGES
+ * =========================================================
  */
 
 function populateLanguages() {
@@ -215,112 +311,179 @@ function populateLanguages() {
     targetLanguage.innerHTML = "";
 
 
+    /*
+     * Auto detection
+     */
+
     const detectOption =
-        document.createElement("option");
-
-    detectOption.value = "auto";
-    detectOption.textContent = "Detect language";
-
-    sourceLanguage.appendChild(detectOption);
+        document.createElement(
+            "option"
+        );
 
 
-    LANGUAGES.forEach(([code, name]) => {
-
-        const sourceOption =
-            document.createElement("option");
-
-        sourceOption.value = code;
-        sourceOption.textContent = name;
-
-        sourceLanguage.appendChild(sourceOption);
+    detectOption.value =
+        "auto";
 
 
-        const targetOption =
-            document.createElement("option");
-
-        targetOption.value = code;
-        targetOption.textContent = name;
-
-        targetLanguage.appendChild(targetOption);
-
-    });
+    detectOption.textContent =
+        "Detect language";
 
 
-    sourceLanguage.value = "auto";
-    targetLanguage.value = "en";
+    sourceLanguage.appendChild(
+        detectOption
+    );
+
+
+    /*
+     * Languages
+     */
+
+    LANGUAGES.forEach(
+        ([code, name]) => {
+
+            const sourceOption =
+                document.createElement(
+                    "option"
+                );
+
+
+            sourceOption.value =
+                code;
+
+
+            sourceOption.textContent =
+                name;
+
+
+            sourceLanguage.appendChild(
+                sourceOption
+            );
+
+
+            const targetOption =
+                document.createElement(
+                    "option"
+                );
+
+
+            targetOption.value =
+                code;
+
+
+            targetOption.textContent =
+                name;
+
+
+            targetLanguage.appendChild(
+                targetOption
+            );
+
+        }
+    );
+
+
+    sourceLanguage.value =
+        "auto";
+
+
+    targetLanguage.value =
+        "en";
+
 }
 
 
+
 /*
- * Character counter.
+ * =========================================================
+ * CHARACTER COUNT
+ * =========================================================
  */
 
 function updateCharacterCount() {
 
     characterCount.textContent =
         `${sourceText.value.length} / 5000`;
+
 }
 
 
+
 /*
- * Display errors.
+ * =========================================================
+ * ERROR
+ * =========================================================
  */
 
 function showError(message) {
 
-    errorMessage.textContent = message;
-    errorMessage.classList.remove("hidden");
+    errorMessage.textContent =
+        message;
+
+
+    errorMessage.classList.remove(
+        "hidden"
+    );
 
 }
+
 
 
 function hideError() {
 
-    errorMessage.textContent = "";
-    errorMessage.classList.add("hidden");
+    errorMessage.textContent =
+        "";
+
+
+    errorMessage.classList.add(
+        "hidden"
+    );
 
 }
 
 
+
 /*
- * Loading state.
+ * =========================================================
+ * LOADING
+ * =========================================================
  */
 
 function setLoading(isLoading) {
 
-    translateButton.disabled = isLoading;
+    translateButton.disabled =
+        isLoading;
+
 
     if (isLoading) {
 
         translateButtonText.textContent =
             "Translating";
 
-        translateSpinner.classList.remove("hidden");
+
+        translateSpinner.classList.remove(
+            "hidden"
+        );
 
     } else {
 
         translateButtonText.textContent =
             "Translate";
 
-        translateSpinner.classList.add("hidden");
+
+        translateSpinner.classList.add(
+            "hidden"
+        );
 
     }
 
 }
 
 
+
 /*
- * Extract translation from different possible
- * response formats.
- *
- * Your existing API returns:
- *
- * {
- *   "response": "success",
- *   "sl": "en",
- *   "tl": "hi",
- *   "result": "..."
- * }
+ * =========================================================
+ * API RESULT
+ * =========================================================
  */
 
 function getTranslation(data) {
@@ -330,37 +493,66 @@ function getTranslation(data) {
     }
 
 
-    if (typeof data === "string") {
+    if (
+        typeof data ===
+        "string"
+    ) {
+
         return data;
+
     }
 
 
-    if (typeof data.result === "string") {
+    if (
+        typeof data.result ===
+        "string"
+    ) {
+
         return data.result;
+
     }
 
 
-    if (typeof data.translation === "string") {
+    if (
+        typeof data.translation ===
+        "string"
+    ) {
+
         return data.translation;
+
     }
 
 
-    if (typeof data.translatedText === "string") {
+    if (
+        typeof data.translatedText ===
+        "string"
+    ) {
+
         return data.translatedText;
+
     }
 
 
-    if (typeof data.text === "string") {
+    if (
+        typeof data.text ===
+        "string"
+    ) {
+
         return data.text;
+
     }
 
 
     return "";
+
 }
 
 
+
 /*
- * Translate.
+ * =========================================================
+ * TRANSLATE
+ * =========================================================
  */
 
 async function translate() {
@@ -374,19 +566,24 @@ async function translate() {
         translationResult.textContent =
             "Translation";
 
+
         translationResult.classList.remove(
             "has-result"
         );
 
+
         hideError();
 
+
         return;
+
     }
 
 
     hideError();
 
     setLoading(true);
+
 
     translationStatus.textContent =
         "Translating…";
@@ -397,9 +594,14 @@ async function translate() {
         const source =
             sourceLanguage.value;
 
+
         const target =
             targetLanguage.value;
 
+
+        /*
+         * Same language
+         */
 
         if (
             source !== "auto" &&
@@ -409,33 +611,60 @@ async function translate() {
             translationResult.textContent =
                 text;
 
+
             translationResult.classList.add(
                 "has-result"
             );
 
+
             translationStatus.textContent =
                 "Same language";
 
+
             return;
+
         }
 
+
+        /*
+         * API parameters
+         */
 
         const params =
             new URLSearchParams();
 
 
-        params.set("sl", source);
-        params.set("tl", target);
-        params.set("q", text);
+        params.set(
+            "sl",
+            source
+        );
 
+
+        params.set(
+            "tl",
+            target
+        );
+
+
+        params.set(
+            "q",
+            text
+        );
+
+
+        /*
+         * API request
+         */
 
         const response =
             await fetch(
                 `${API_URL}?${params.toString()}`,
                 {
                     method: "GET",
+
                     headers: {
-                        "Accept": "application/json"
+                        "Accept":
+                            "application/json"
                     }
                 }
             );
@@ -470,6 +699,7 @@ async function translate() {
         translationResult.textContent =
             result;
 
+
         translationResult.classList.add(
             "has-result"
         );
@@ -483,18 +713,24 @@ async function translate() {
 
         console.error(error);
 
+
         translationResult.textContent =
             "Translation";
+
 
         translationResult.classList.remove(
             "has-result"
         );
 
-        translationStatus.textContent = "";
+
+        translationStatus.textContent =
+            "";
+
 
         showError(
             "Unable to translate right now. Please check the API and try again."
         );
+
 
     } finally {
 
@@ -505,20 +741,28 @@ async function translate() {
 }
 
 
+
 /*
- * Swap languages.
+ * =========================================================
+ * SWAP
+ * =========================================================
  */
 
 function swapLanguages() {
 
-    if (sourceLanguage.value === "auto") {
+    if (
+        sourceLanguage.value ===
+        "auto"
+    ) {
 
         return;
+
     }
 
 
     const oldSource =
         sourceLanguage.value;
+
 
     const oldTarget =
         targetLanguage.value;
@@ -527,23 +771,29 @@ function swapLanguages() {
     sourceLanguage.value =
         oldTarget;
 
+
     targetLanguage.value =
         oldSource;
 
 
     if (
         sourceText.value.trim() &&
-        translationResult.classList.contains("has-result")
+        translationResult.classList.contains(
+            "has-result"
+        )
     ) {
 
         const oldText =
             sourceText.value;
 
+
         sourceText.value =
             translationResult.textContent;
 
+
         translationResult.textContent =
             oldText;
+
 
         updateCharacterCount();
 
@@ -552,34 +802,65 @@ function swapLanguages() {
 }
 
 
+
 /*
- * Clear.
+ * =========================================================
+ * CLEAR
+ * =========================================================
  */
 
 function clearTranslation() {
 
-    sourceText.value = "";
+    sourceText.value =
+        "";
+
 
     translationResult.textContent =
         "Translation";
+
 
     translationResult.classList.remove(
         "has-result"
     );
 
-    translationStatus.textContent = "";
+
+    translationStatus.textContent =
+        "";
+
 
     hideError();
 
+
     updateCharacterCount();
+
+
+    /*
+     * Reset image input.
+     */
+
+    if (imageInput) {
+
+        imageInput.value =
+            "";
+
+    }
+
+
+    hideOCRStatus();
+
+    hideOCRProgress();
+
 
     sourceText.focus();
 
 }
 
 
+
 /*
- * Copy translation.
+ * =========================================================
+ * COPY
+ * =========================================================
  */
 
 async function copyTranslation() {
@@ -594,33 +875,43 @@ async function copyTranslation() {
     ) {
 
         return;
+
     }
 
 
     try {
 
-        await navigator.clipboard.writeText(result);
+        await navigator.clipboard.writeText(
+            result
+        );
+
 
         translationStatus.textContent =
             "Copied!";
 
-        setTimeout(() => {
 
-            if (
-                translationStatus.textContent ===
-                "Copied!"
-            ) {
+        setTimeout(
+            function () {
 
-                translationStatus.textContent =
-                    "Translated";
+                if (
+                    translationStatus.textContent ===
+                    "Copied!"
+                ) {
 
-            }
+                    translationStatus.textContent =
+                        "Translated";
 
-        }, 1500);
+                }
+
+            },
+            1500
+        );
+
 
     } catch (error) {
 
         console.error(error);
+
 
         showError(
             "Unable to copy the translation."
@@ -631,8 +922,586 @@ async function copyTranslation() {
 }
 
 
+
 /*
- * Events.
+ * =========================================================
+ * OCR LANGUAGE MAP
+ * =========================================================
+ */
+
+const OCR_LANGUAGES = {
+
+    "en": "eng",
+
+    "hi": "hin",
+
+    "gu": "guj",
+
+    "mr": "mar",
+
+    "bn": "ben",
+
+    "ta": "tam",
+
+    "te": "tel",
+
+    "kn": "kan",
+
+    "ml": "mal",
+
+    "pa": "pan",
+
+    "ur": "urd",
+
+    "ne": "nep",
+
+    "sa": "san",
+
+    "ar": "ara",
+
+    "fa": "fas",
+
+    "de": "deu",
+
+    "fr": "fra",
+
+    "es": "spa",
+
+    "it": "ita",
+
+    "pt": "por",
+
+    "ru": "rus",
+
+    "ja": "jpn",
+
+    "ko": "kor",
+
+    "zh-CN": "chi_sim",
+
+    "zh-TW": "chi_tra",
+
+    "tr": "tur",
+
+    "vi": "vie",
+
+    "nl": "nld",
+
+    "pl": "pol",
+
+    "uk": "ukr",
+
+    "ro": "ron",
+
+    "cs": "ces",
+
+    "sv": "swe",
+
+    "da": "dan",
+
+    "fi": "fin",
+
+    "el": "ell",
+
+    "he": "heb",
+
+    "hu": "hun",
+
+    "id": "ind",
+
+    "no": "nor",
+
+    "sk": "slk"
+
+};
+
+
+
+/*
+ * =========================================================
+ * GET OCR LANGUAGE
+ * =========================================================
+ */
+
+function getOCRLanguage() {
+
+    const language =
+        sourceLanguage.value;
+
+
+    /*
+     * Auto:
+     *
+     * English + Hindi + Gujarati
+     */
+
+    if (
+        language === "auto"
+    ) {
+
+        return "eng+hin+guj";
+
+    }
+
+
+    return (
+        OCR_LANGUAGES[language] ||
+        "eng"
+    );
+
+}
+
+
+
+/*
+ * =========================================================
+ * OCR STATUS
+ * =========================================================
+ */
+
+function showOCRStatus(message) {
+
+    if (!ocrStatus) {
+        return;
+    }
+
+
+    ocrStatus.textContent =
+        message;
+
+
+    ocrStatus.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+
+function hideOCRStatus() {
+
+    if (!ocrStatus) {
+        return;
+    }
+
+
+    ocrStatus.textContent =
+        "";
+
+
+    ocrStatus.classList.add(
+        "hidden"
+    );
+
+}
+
+
+
+/*
+ * =========================================================
+ * OCR PROGRESS
+ * =========================================================
+ */
+
+function setOCRProgress(value) {
+
+    if (!ocrProgress) {
+        return;
+    }
+
+
+    const percent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                value
+            )
+        );
+
+
+    ocrProgress.style.width =
+        `${percent}%`;
+
+}
+
+
+
+function showOCRProgress() {
+
+    if (!ocrProgressContainer) {
+        return;
+    }
+
+
+    ocrProgressContainer.classList.remove(
+        "hidden"
+    );
+
+
+    setOCRProgress(0);
+
+}
+
+
+
+function hideOCRProgress() {
+
+    if (!ocrProgressContainer) {
+        return;
+    }
+
+
+    ocrProgressContainer.classList.add(
+        "hidden"
+    );
+
+
+    setOCRProgress(0);
+
+}
+
+
+
+/*
+ * =========================================================
+ * IMAGE OCR
+ * =========================================================
+ */
+
+async function runOCR(file) {
+
+    if (!file) {
+        return;
+    }
+
+
+    /*
+     * Validate image.
+     */
+
+    if (
+        !file.type ||
+        !file.type.startsWith(
+            "image/"
+        )
+    ) {
+
+        showOCRStatus(
+            "Please select an image file."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * Check Tesseract.
+     */
+
+    if (
+        typeof Tesseract ===
+        "undefined"
+    ) {
+
+        showOCRStatus(
+            "OCR library could not be loaded. Please refresh the page."
+        );
+
+
+        return;
+
+    }
+
+
+    let worker = null;
+
+
+    try {
+
+        showOCRProgress();
+
+
+        showOCRStatus(
+            "Preparing OCR…"
+        );
+
+
+        /*
+         * Determine OCR language.
+         */
+
+        const language =
+            getOCRLanguage();
+
+
+        /*
+         * Create Tesseract worker.
+         */
+
+        worker =
+            await Tesseract.createWorker(
+                language,
+                1,
+                {
+
+                    logger:
+                        function (message) {
+
+                            /*
+                             * Progress
+                             */
+
+                            if (
+                                typeof message.progress ===
+                                "number"
+                            ) {
+
+                                setOCRProgress(
+                                    message.progress *
+                                    100
+                                );
+
+                            }
+
+
+                            /*
+                             * Status
+                             */
+
+                            if (
+                                message.status
+                            ) {
+
+                                showOCRStatus(
+                                    `🔎 ${message.status}`
+                                );
+
+                            }
+
+                        }
+
+                }
+            );
+
+
+        showOCRStatus(
+            "🔎 Extracting text…"
+        );
+
+
+        /*
+         * OCR image.
+         */
+
+        const result =
+            await worker.recognize(
+                file
+            );
+
+
+        /*
+         * Get extracted text.
+         */
+
+        const extractedText =
+            result.data.text.trim();
+
+
+        /*
+         * Terminate worker.
+         */
+
+        await worker.terminate();
+
+        worker = null;
+
+
+        /*
+         * No text found.
+         */
+
+        if (!extractedText) {
+
+            hideOCRProgress();
+
+
+            showOCRStatus(
+                "⚠️ No text found in this image."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+         * PUT OCR TEXT DIRECTLY
+         * INTO TRANSLATION INPUT.
+         */
+
+        sourceText.value =
+            extractedText;
+
+
+        /*
+         * Update character count.
+         */
+
+        updateCharacterCount();
+
+
+        /*
+         * Clear old translation.
+         */
+
+        translationResult.textContent =
+            "Translation";
+
+
+        translationResult.classList.remove(
+            "has-result"
+        );
+
+
+        translationStatus.textContent =
+            "";
+
+
+        /*
+         * Clear errors.
+         */
+
+        hideError();
+
+
+        /*
+         * Finish progress.
+         */
+
+        setOCRProgress(100);
+
+
+        showOCRStatus(
+            "✅ Text extracted successfully!"
+        );
+
+
+        /*
+         * Focus input.
+         */
+
+        sourceText.focus();
+
+
+        /*
+         * Hide OCR message.
+         */
+
+        setTimeout(
+            function () {
+
+                hideOCRStatus();
+
+                hideOCRProgress();
+
+            },
+            2000
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "OCR Error:",
+            error
+        );
+
+
+        /*
+         * Clean up worker.
+         */
+
+        if (worker) {
+
+            try {
+
+                await worker.terminate();
+
+            } catch (
+                terminateError
+            ) {
+
+                console.error(
+                    terminateError
+                );
+
+            }
+
+        }
+
+
+        hideOCRProgress();
+
+
+        showOCRStatus(
+            "❌ OCR failed. Please try another image."
+        );
+
+    }
+
+}
+
+
+
+/*
+ * =========================================================
+ * IMAGE INPUT EVENT
+ * =========================================================
+ */
+
+if (imageInput) {
+
+    imageInput.addEventListener(
+        "change",
+        function () {
+
+            if (
+                this.files &&
+                this.files.length > 0
+            ) {
+
+                runOCR(
+                    this.files[0]
+                );
+
+            }
+
+
+            /*
+             * Reset input.
+             *
+             * This allows the user to select
+             * the same image again.
+             */
+
+            this.value =
+                "";
+
+        }
+    );
+
+}
+
+
+
+/*
+ * =========================================================
+ * EVENTS
+ * =========================================================
  */
 
 sourceText.addEventListener(
@@ -665,12 +1534,20 @@ copyButton.addEventListener(
 );
 
 
+
+/*
+ * Ctrl + Enter / Cmd + Enter
+ */
+
 sourceText.addEventListener(
     "keydown",
     function (event) {
 
         if (
-            (event.ctrlKey || event.metaKey) &&
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
             event.key === "Enter"
         ) {
 
@@ -682,37 +1559,53 @@ sourceText.addEventListener(
 );
 
 
+
 /*
- * Change target language and automatically
- * translate existing text.
+ * Target language change
  */
 
 targetLanguage.addEventListener(
     "change",
     function () {
 
-        if (sourceText.value.trim()) {
+        if (
+            sourceText.value.trim()
+        ) {
+
             translate();
+
         }
 
     }
 );
 
+
+
+/*
+ * Source language change
+ */
 
 sourceLanguage.addEventListener(
     "change",
     function () {
 
-        if (sourceText.value.trim()) {
+        if (
+            sourceText.value.trim()
+        ) {
+
             translate();
+
         }
 
     }
 );
 
 
+
 /*
- * Mobile menu.
+ * =========================================================
+ * MOBILE MENU
+ * =========================================================
  */
 
 mobileMenuButton.addEventListener(
@@ -727,13 +1620,20 @@ mobileMenuButton.addEventListener(
 );
 
 
+
 /*
- * Initialize.
+ * =========================================================
+ * INITIALIZE
+ * =========================================================
  */
 
 populateLanguages();
 
+
 updateCharacterCount();
 
-document.getElementById("year").textContent =
+
+document.getElementById(
+    "year"
+).textContent =
     new Date().getFullYear();
