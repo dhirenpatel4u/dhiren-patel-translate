@@ -17,70 +17,47 @@
 
     <DisplayName DefaultValue="Dhiren Translate"/>
 
-    <Description
-        DefaultValue="Dhiren Translate for Microsoft Excel"/>
+    <Description DefaultValue="Dhiren Translate for Microsoft Excel"/>
 
-    <IconUrl
-        DefaultValue="https://dhiren-patel-translate.vercel.app/icon-32.png"/>
+    <IconUrl DefaultValue="https://dhiren-patel-translate.vercel.app/icon-32.png"/>
 
-    <HighResolutionIconUrl
-        DefaultValue="https://dhiren-patel-translate.vercel.app/icon-80.png"/>
+    <HighResolutionIconUrl DefaultValue="https://dhiren-patel-translate.vercel.app/icon-80.png"/>
 
-    <SupportUrl
-        DefaultValue="https://github.com/dhirenpatel4u/dhiren-patel-translate"/>
+    <SupportUrl DefaultValue="https://github.com/dhirenpatel4u/dhiren-patel-translate"/>
 
     <AppDomains>
-
-        <AppDomain>
-            https://dhiren-patel-translate.vercel.app
-        </AppDomain>
-
+        <AppDomain>https://dhiren-patel-translate.vercel.app</AppDomain>
     </AppDomains>
 
     <Hosts>
-
         <Host Name="Workbook"/>
-
     </Hosts>
 
     <DefaultSettings>
-
         <SourceLocation
             DefaultValue="https://dhiren-patel-translate.vercel.app/excel-addin/taskpane.html"/>
-
     </DefaultSettings>
 
-    <Permissions>
-        ReadWriteDocument
-    </Permissions>
-
+    <Permissions>ReadWriteDocument</Permissions>
 
     <VersionOverrides
         xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
         xsi:type="VersionOverridesV1_0">
 
         <Requirements>
-
             <bt:Sets DefaultMinVersion="1.3">
-
                 <bt:Set Name="Excel"/>
-
             </bt:Sets>
-
         </Requirements>
 
-
         <Hosts>
-
             <Host xsi:type="Workbook">
 
                 <DesktopFormFactor>
 
                     <FunctionFile resid="Commands.Url"/>
 
-
-                    <ExtensionPoint
-                        xsi:type="PrimaryCommandSurface">
+                    <ExtensionPoint xsi:type="PrimaryCommandSurface">
 
                         <OfficeTab id="TabHome">
 
@@ -88,23 +65,19 @@
 
                                 <Label resid="GroupLabel"/>
 
-
                                 <Control
                                     xsi:type="Button"
                                     id="DhirenTranslateButton">
 
                                     <Label resid="ButtonLabel"/>
 
-
                                     <Supertip>
 
                                         <Title resid="ButtonLabel"/>
 
-                                        <Description
-                                            resid="ButtonDescription"/>
+                                        <Description resid="ButtonDescription"/>
 
                                     </Supertip>
-
 
                                     <Icon>
 
@@ -122,13 +95,11 @@
 
                                     </Icon>
 
-
                                     <Action xsi:type="ShowTaskpane">
 
                                         <TaskpaneId>
                                             DhirenTranslatePane
                                         </TaskpaneId>
-
 
                                         <SourceLocation
                                             resid="Taskpane.Url"/>
@@ -146,9 +117,7 @@
                 </DesktopFormFactor>
 
             </Host>
-
         </Hosts>
-
 
         <Resources>
 
@@ -168,7 +137,6 @@
 
             </bt:Images>
 
-
             <bt:Urls>
 
                 <bt:Url
@@ -181,7 +149,6 @@
 
             </bt:Urls>
 
-
             <bt:ShortStrings>
 
                 <bt:String
@@ -193,7 +160,6 @@
                     DefaultValue="Translator"/>
 
             </bt:ShortStrings>
-
 
             <bt:LongStrings>
 
