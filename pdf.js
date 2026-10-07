@@ -2,321 +2,75 @@
 
 /*
 ===========================================================
- Dhiren Translate
- PDF OCR + Translation
+ DHIREN TRANSLATE
+ PDF OCR + TRANSLATION
 ===========================================================
 */
 
 
-/* =========================================================
-   CONFIG
-   ========================================================= */
-
-const PDFJS_VERSION = "3.11.174";
-
-const PDFJS_WORKER =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-const API_BASE = "/api/";
-
-const PDF_RENDER_SCALE = 2;
-
-const JPEG_QUALITY = 0.90;
+console.log("====================================");
+console.log("Dhiren Translate PDF module starting");
+console.log("====================================");
 
 
 /* =========================================================
-   DOM
+   ELEMENTS
    ========================================================= */
 
 const pdfInput =
     document.getElementById("pdfInput");
 
-const sourceLanguage =
-    document.getElementById("sourceLanguage");
-
-const targetLanguage =
-    document.getElementById("targetLanguage");
-
-const ocrStatus =
+const pdfStatus =
     document.getElementById("ocrStatus");
 
-const ocrProgressContainer =
+const pdfProgressContainer =
     document.getElementById(
         "ocrProgressContainer"
     );
 
-const ocrProgress =
+const pdfProgress =
     document.getElementById(
         "ocrProgress"
     );
 
-const translationStatus =
-    document.getElementById(
-        "translationStatus"
-    );
-
-const errorMessage =
+const pdfError =
     document.getElementById(
         "errorMessage"
     );
 
-const sourceText =
+const pdfTranslationStatus =
     document.getElementById(
-        "sourceText"
+        "translationStatus"
+    );
+
+const pdfSourceLanguage =
+    document.getElementById(
+        "sourceLanguage"
+    );
+
+const pdfTargetLanguage =
+    document.getElementById(
+        "targetLanguage"
     );
 
 
 /* =========================================================
-   LOG
+   CONFIGURATION
    ========================================================= */
 
-console.log(
-    "========================================"
-);
+const PDF_RENDER_SCALE = 2;
 
-console.log(
-    "Dhiren Translate PDF module loaded"
-);
+const PDF_JPEG_QUALITY = 0.90;
 
-console.log(
-    "PDF input:",
-    pdfInput
-);
-
-console.log(
-    "PDF.js:",
-    typeof pdfjsLib !== "undefined"
-        ? pdfjsLib.version
-        : "NOT LOADED"
-);
-
-console.log(
-    "jsPDF:",
-    typeof window.jspdf !== "undefined"
-        ? "LOADED"
-        : "NOT LOADED"
-);
-
-console.log(
-    "Tesseract:",
-    typeof Tesseract !== "undefined"
-        ? "LOADED"
-        : "NOT LOADED"
-);
-
-console.log(
-    "========================================"
-);
+const PDF_WORKER_URL =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 
 /* =========================================================
-   PDF.JS WORKER
+   LANGUAGE MAP
    ========================================================= */
 
-if (
-    typeof pdfjsLib !==
-    "undefined"
-) {
-
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-        PDFJS_WORKER;
-
-}
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-function setStatus(
-    message
-) {
-
-    console.log(
-        "[PDF]",
-        message
-    );
-
-
-    if (ocrStatus) {
-
-        ocrStatus.textContent =
-            message;
-
-        ocrStatus.classList.remove(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PROGRESS
-   ========================================================= */
-
-function setProgress(
-    value
-) {
-
-    value =
-        Math.max(
-            0,
-            Math.min(
-                100,
-                value
-            )
-        );
-
-
-    if (
-        ocrProgressContainer
-    ) {
-
-        ocrProgressContainer.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    if (
-        ocrProgress
-    ) {
-
-        ocrProgress.style.width =
-            value + "%";
-
-    }
-
-}
-
-
-/* =========================================================
-   ERROR
-   ========================================================= */
-
-function showError(
-    message
-) {
-
-    console.error(
-        "[PDF ERROR]",
-        message
-    );
-
-
-    if (errorMessage) {
-
-        errorMessage.textContent =
-            "❌ " + message;
-
-        errorMessage.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    setStatus(
-        "❌ " + message
-    );
-
-}
-
-
-/* =========================================================
-   CLEAR ERROR
-   ========================================================= */
-
-function clearError() {
-
-    if (errorMessage) {
-
-        errorMessage.textContent =
-            "";
-
-        errorMessage.classList.add(
-            "hidden"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   LIBRARY CHECK
-   ========================================================= */
-
-function checkLibraries() {
-
-    console.log(
-        "Checking PDF libraries..."
-    );
-
-
-    if (
-        typeof pdfjsLib ===
-        "undefined"
-    ) {
-
-        throw new Error(
-            "PDF.js is not loaded. Check the PDF.js CDN in index.html."
-        );
-
-    }
-
-
-    if (
-        typeof window.jspdf ===
-        "undefined"
-    ) {
-
-        throw new Error(
-            "jsPDF is not loaded. Check the jsPDF CDN in index.html."
-        );
-
-    }
-
-
-    if (
-        typeof window.jspdf.jsPDF !==
-        "function"
-    ) {
-
-        throw new Error(
-            "jsPDF constructor is unavailable."
-        );
-
-    }
-
-
-    if (
-        typeof Tesseract ===
-        "undefined"
-    ) {
-
-        throw new Error(
-            "Tesseract.js is not loaded."
-        );
-
-    }
-
-
-    console.log(
-        "All libraries OK."
-    );
-
-}
-
-
-/* =========================================================
-   OCR LANGUAGE MAP
-   ========================================================= */
-
-const OCR_LANGUAGES = {
+const PDF_OCR_LANGUAGE_MAP = {
 
     auto: "eng",
 
@@ -390,13 +144,229 @@ const OCR_LANGUAGES = {
 
 
 /* =========================================================
-   GET SOURCE LANGUAGE
+   STATUS FUNCTIONS
    ========================================================= */
 
-function getSourceLanguage() {
+function pdfSetStatus(message) {
+
+    console.log(
+        "[PDF]",
+        message
+    );
+
+
+    if (pdfStatus) {
+
+        pdfStatus.textContent =
+            message;
+
+        pdfStatus.classList.remove(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+function pdfSetProgress(value) {
+
+    value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                value
+            )
+        );
+
+
+    if (pdfProgressContainer) {
+
+        pdfProgressContainer.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    if (pdfProgress) {
+
+        pdfProgress.style.width =
+            value + "%";
+
+    }
+
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+function pdfShowError(message) {
+
+    console.error(
+        "[PDF ERROR]",
+        message
+    );
+
+
+    if (pdfError) {
+
+        pdfError.textContent =
+            "❌ " + message;
+
+        pdfError.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    pdfSetStatus(
+        "❌ " + message
+    );
+
+}
+
+
+/* =========================================================
+   CLEAR ERROR
+   ========================================================= */
+
+function pdfClearError() {
+
+    if (pdfError) {
+
+        pdfError.textContent =
+            "";
+
+        pdfError.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LIBRARY CHECK
+   ========================================================= */
+
+function pdfCheckLibraries() {
+
+    console.log(
+        "Checking libraries..."
+    );
+
+
+    console.log(
+        "pdfjsLib:",
+        typeof pdfjsLib
+    );
+
+
+    console.log(
+        "Tesseract:",
+        typeof Tesseract
+    );
+
+
+    console.log(
+        "window.jspdf:",
+        typeof window.jspdf
+    );
+
 
     if (
-        !sourceLanguage
+        typeof pdfjsLib ===
+        "undefined"
+    ) {
+
+        throw new Error(
+            "PDF.js is not loaded."
+        );
+
+    }
+
+
+    if (
+        typeof Tesseract ===
+        "undefined"
+    ) {
+
+        throw new Error(
+            "Tesseract.js is not loaded."
+        );
+
+    }
+
+
+    if (
+        typeof window.jspdf ===
+        "undefined"
+    ) {
+
+        throw new Error(
+            "jsPDF is not loaded."
+        );
+
+    }
+
+
+    if (
+        typeof window.jspdf.jsPDF !==
+        "function"
+    ) {
+
+        throw new Error(
+            "jsPDF constructor is not available."
+        );
+
+    }
+
+
+    console.log(
+        "All libraries loaded successfully."
+    );
+
+}
+
+
+/* =========================================================
+   INITIALIZE PDF.JS
+   ========================================================= */
+
+if (
+    typeof pdfjsLib !==
+    "undefined"
+) {
+
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+        PDF_WORKER_URL;
+
+
+    console.log(
+        "PDF.js worker configured."
+    );
+
+}
+
+
+/* =========================================================
+   GET LANGUAGE
+   ========================================================= */
+
+function pdfGetSourceLanguage() {
+
+    if (
+        !pdfSourceLanguage
     ) {
 
         return "auto";
@@ -405,21 +375,17 @@ function getSourceLanguage() {
 
 
     return (
-        sourceLanguage.value ||
+        pdfSourceLanguage.value ||
         "auto"
     );
 
 }
 
 
-/* =========================================================
-   GET TARGET LANGUAGE
-   ========================================================= */
-
-function getTargetLanguage() {
+function pdfGetTargetLanguage() {
 
     if (
-        !targetLanguage
+        !pdfTargetLanguage
     ) {
 
         return "en";
@@ -428,7 +394,7 @@ function getTargetLanguage() {
 
 
     return (
-        targetLanguage.value ||
+        pdfTargetLanguage.value ||
         "en"
     );
 
@@ -436,24 +402,24 @@ function getTargetLanguage() {
 
 
 /* =========================================================
-   GET OCR LANGUAGE
+   OCR LANGUAGE
    ========================================================= */
 
-function getOCRLanguage() {
+function pdfGetOCRLanguage() {
 
-    let language =
-        getSourceLanguage();
+    let lang =
+        pdfGetSourceLanguage();
 
 
-    language =
-        String(language)
+    lang =
+        String(lang)
             .toLowerCase()
             .split("-")[0]
             .split("_")[0];
 
 
     return (
-        OCR_LANGUAGES[language] ||
+        PDF_OCR_LANGUAGE_MAP[lang] ||
         "eng"
     );
 
@@ -461,18 +427,19 @@ function getOCRLanguage() {
 
 
 /* =========================================================
-   READ PDF FILE
+   LOAD PDF
    ========================================================= */
 
-async function loadPDF(
+async function pdfLoadDocument(
     file
 ) {
 
-    setStatus(
-        "📖 Opening PDF..."
+    pdfSetStatus(
+        "📖 Reading PDF..."
     );
 
-    setProgress(
+
+    pdfSetProgress(
         5
     );
 
@@ -487,16 +454,15 @@ async function loadPDF(
     ) {
 
         throw new Error(
-            "The PDF file is empty."
+            "The selected PDF is empty."
         );
 
     }
 
 
     console.log(
-        "PDF size:",
-        buffer.byteLength,
-        "bytes"
+        "PDF bytes:",
+        buffer.byteLength
     );
 
 
@@ -516,21 +482,14 @@ async function loadPDF(
 
 
     console.log(
-        "PDF loaded.",
-        "Pages:",
-        pdf.numPages
+        "PDF successfully loaded."
     );
 
 
-    if (
-        !pdf.numPages
-    ) {
-
-        throw new Error(
-            "PDF has no pages."
-        );
-
-    }
+    console.log(
+        "Number of pages:",
+        pdf.numPages
+    );
 
 
     return pdf;
@@ -539,10 +498,10 @@ async function loadPDF(
 
 
 /* =========================================================
-   RENDER PAGE
+   RENDER PDF PAGE
    ========================================================= */
 
-async function renderPage(
+async function pdfRenderPage(
     page
 ) {
 
@@ -606,109 +565,132 @@ async function renderPage(
 
 
 /* =========================================================
+   CREATE OCR WORKER
+   ========================================================= */
+
+async function pdfCreateOCRWorker() {
+
+    const language =
+        pdfGetOCRLanguage();
+
+
+    console.log(
+        "Creating Tesseract worker:",
+        language
+    );
+
+
+    pdfSetStatus(
+        "🔤 Loading OCR engine..."
+    );
+
+
+    const worker =
+        await Tesseract.createWorker(
+
+            language,
+
+            1,
+
+            {
+
+                logger:
+                    function(info) {
+
+                        if (
+                            info.status ===
+                            "loading language"
+                        ) {
+
+                            console.log(
+                                "Loading OCR language:",
+                                info.progress
+                            );
+
+                        }
+
+
+                        if (
+                            info.status ===
+                            "initializing api"
+                        ) {
+
+                            console.log(
+                                "Initializing OCR:"
+                            );
+
+                        }
+
+
+                        if (
+                            info.status ===
+                            "recognizing text"
+                        ) {
+
+                            console.log(
+
+                                "OCR:",
+                                Math.round(
+                                    (
+                                        info.progress ||
+                                        0
+                                    ) * 100
+                                ) + "%"
+
+                            );
+
+                        }
+
+                    }
+
+            }
+
+        );
+
+
+    console.log(
+        "Tesseract worker ready."
+    );
+
+
+    return worker;
+
+}
+
+
+/* =========================================================
    OCR PAGE
    ========================================================= */
 
-async function recognizePage(
+async function pdfOCRPage(
+    worker,
     canvas,
     pageNumber,
     totalPages
 ) {
 
-    const language =
-        getOCRLanguage();
-
-
-    setStatus(
+    pdfSetStatus(
 
         `🔍 OCR page ${pageNumber} of ${totalPages}...`
 
     );
 
 
-    console.log(
-        "OCR language:",
-        language
-    );
-
-
-    let worker;
-
-
-    try {
-
-        worker =
-            await Tesseract.createWorker(
-                language,
-                1,
-                {
-
-                    logger:
-                        function(info) {
-
-                            if (
-                                info.status ===
-                                "recognizing text"
-                            ) {
-
-                                const progress =
-                                    info.progress ||
-                                    0;
-
-
-                                console.log(
-
-                                    `OCR page ${pageNumber}:`,
-                                    Math.round(
-                                        progress *
-                                        100
-                                    ) + "%"
-
-                                );
-
-                            }
-
-                        }
-
-                }
-            );
-
-
-        const result =
-            await worker.recognize(
-                canvas
-            );
-
-
-        console.log(
-            "OCR result:",
-            result.data
+    const result =
+        await worker.recognize(
+            canvas
         );
 
 
-        return result.data;
+    console.log(
+
+        `OCR page ${pageNumber} result:`,
+        result.data
+
+    );
 
 
-    } finally {
-
-        if (worker) {
-
-            try {
-
-                await worker.terminate();
-
-            } catch (e) {
-
-                console.warn(
-                    "Worker termination error:",
-                    e
-                );
-
-            }
-
-        }
-
-    }
+    return result.data;
 
 }
 
@@ -717,7 +699,7 @@ async function recognizePage(
    GET OCR LINES
    ========================================================= */
 
-function getLines(
+function pdfGetOCRLines(
     data
 ) {
 
@@ -729,19 +711,26 @@ function getLines(
     ) {
 
         return data.lines
+
             .filter(
                 line =>
                     line &&
                     line.text &&
                     line.bbox
             )
+
             .map(
                 line => ({
 
                     text:
-                        cleanText(
+                        String(
                             line.text
-                        ),
+                        )
+                            .replace(
+                                /\s+/g,
+                                " "
+                            )
+                            .trim(),
 
                     confidence:
                         Number(
@@ -775,55 +764,11 @@ function getLines(
 
                 })
             )
+
             .filter(
                 line =>
                     line.text.length > 0
             );
-
-    }
-
-
-    /*
-       Fallback if Tesseract doesn't provide lines.
-    */
-
-    if (
-        data &&
-        data.text
-    ) {
-
-        const text =
-            cleanText(
-                data.text
-            );
-
-
-        if (!text) {
-
-            return [];
-
-        }
-
-
-        return [
-
-            {
-
-                text,
-
-                confidence: 50,
-
-                x0: 20,
-
-                y0: 20,
-
-                x1: 500,
-
-                y1: 60
-
-            }
-
-        ];
 
     }
 
@@ -834,41 +779,23 @@ function getLines(
 
 
 /* =========================================================
-   CLEAN TEXT
+   TRANSLATE TEXT
    ========================================================= */
 
-function cleanText(
-    text
-) {
-
-    return String(
-        text || ""
-    )
-        .replace(
-            /\s+/g,
-            " "
-        )
-        .trim();
-
-}
-
-
-/* =========================================================
-   TRANSLATE ONE LINE
-   ========================================================= */
-
-async function translateLine(
+async function pdfTranslateText(
     text
 ) {
 
     const sl =
-        getSourceLanguage();
+        pdfGetSourceLanguage();
 
     const tl =
-        getTargetLanguage();
+        pdfGetTargetLanguage();
 
 
-    if (!text) {
+    if (
+        !text
+    ) {
 
         return "";
 
@@ -876,7 +803,7 @@ async function translateLine(
 
 
     /*
-       Same language = no translation.
+       Same language.
     */
 
     if (
@@ -890,17 +817,15 @@ async function translateLine(
 
 
     const url =
-        API_BASE +
-        "?sl=" +
-        encodeURIComponent(sl) +
-        "&tl=" +
-        encodeURIComponent(tl) +
-        "&q=" +
-        encodeURIComponent(text);
+        API_BASE_FOR_PDF(
+            sl,
+            tl,
+            text
+        );
 
 
     console.log(
-        "Translation request:",
+        "Translation URL:",
         url
     );
 
@@ -914,7 +839,7 @@ async function translateLine(
 
                 headers: {
 
-                    "Accept":
+                    Accept:
                         "application/json,text/plain,*/*"
 
                 }
@@ -922,11 +847,13 @@ async function translateLine(
         );
 
 
-    if (!response.ok) {
+    if (
+        !response.ok
+    ) {
 
         throw new Error(
 
-            `Translation API returned HTTP ${response.status}`
+            `Translation API error: HTTP ${response.status}`
 
         );
 
@@ -939,7 +866,7 @@ async function translateLine(
         ) || "";
 
 
-    let result;
+    let data;
 
 
     if (
@@ -948,25 +875,47 @@ async function translateLine(
         )
     ) {
 
-        result =
+        data =
             await response.json();
 
     } else {
 
-        result =
+        data =
             await response.text();
 
     }
 
 
-    console.log(
-        "Translation response:",
-        result
+    return pdfExtractTranslation(
+        data
     );
 
+}
 
-    return extractTranslation(
-        result
+
+/* =========================================================
+   API URL
+   ========================================================= */
+
+function API_BASE_FOR_PDF(
+    sl,
+    tl,
+    text
+) {
+
+    return (
+
+        "/api/?" +
+
+        "sl=" +
+        encodeURIComponent(sl) +
+
+        "&tl=" +
+        encodeURIComponent(tl) +
+
+        "&q=" +
+        encodeURIComponent(text)
+
     );
 
 }
@@ -976,32 +925,28 @@ async function translateLine(
    EXTRACT TRANSLATION
    ========================================================= */
 
-function extractTranslation(
-    result
+function pdfExtractTranslation(
+    data
 ) {
 
     if (
-        typeof result ===
+        typeof data ===
         "string"
     ) {
 
-        return result.trim();
+        return data.trim();
 
     }
 
 
     if (
-        !result
+        !data
     ) {
 
         return "";
 
     }
 
-
-    /*
-       Common API formats.
-    */
 
     const keys = [
 
@@ -1025,42 +970,38 @@ function extractTranslation(
     ) {
 
         if (
-            typeof result[key] ===
+            typeof data[key] ===
             "string"
         ) {
 
-            return result[key].trim();
+            return data[key].trim();
 
         }
 
     }
 
 
-    /*
-       Nested data.
-    */
-
     if (
-        result.data
+        data.data
     ) {
 
         if (
-            typeof result.data ===
+            typeof data.data ===
             "string"
         ) {
 
-            return result.data.trim();
+            return data.data.trim();
 
         }
 
 
         if (
-            typeof result.data ===
+            typeof data.data ===
             "object"
         ) {
 
-            return extractTranslation(
-                result.data
+            return pdfExtractTranslation(
+                data.data
             );
 
         }
@@ -1068,18 +1009,19 @@ function extractTranslation(
     }
 
 
-    /*
-       Array.
-    */
-
     if (
-        Array.isArray(result) &&
-        result.length
+        Array.isArray(data)
     ) {
 
-        return extractTranslation(
-            result[0]
-        );
+        if (
+            data.length
+        ) {
+
+            return pdfExtractTranslation(
+                data[0]
+            );
+
+        }
 
     }
 
@@ -1090,10 +1032,10 @@ function extractTranslation(
 
 
 /* =========================================================
-   SAMPLE BACKGROUND
+   GET BACKGROUND COLOR
    ========================================================= */
 
-function getBackgroundColor(
+function pdfGetBackgroundColor(
     canvas,
     line
 ) {
@@ -1129,37 +1071,47 @@ function getBackgroundColor(
 
 
         const width =
-            Math.max(
-                1,
-                Math.floor(
-                    line.x1 -
-                    line.x0
-                )
+            Math.min(
+
+                Math.max(
+                    1,
+                    Math.floor(
+                        line.x1 -
+                        line.x0
+                    )
+                ),
+
+                canvas.width -
+                x
+
             );
 
 
         const height =
-            Math.max(
-                1,
-                Math.floor(
-                    line.y1 -
-                    line.y0
-                )
+            Math.min(
+
+                Math.max(
+                    1,
+                    Math.floor(
+                        line.y1 -
+                        line.y0
+                    )
+                ),
+
+                canvas.height -
+                y
+
             );
 
 
         const image =
             ctx.getImageData(
+
                 x,
                 y,
-                Math.min(
-                    width,
-                    canvas.width - x
-                ),
-                Math.min(
-                    height,
-                    canvas.height - y
-                )
+                width,
+                height
+
             );
 
 
@@ -1186,10 +1138,6 @@ function getBackgroundColor(
                 image.data[i + 2];
 
 
-            /*
-               Prefer light pixels.
-            */
-
             if (
                 rr > 180 &&
                 gg > 180 &&
@@ -1212,9 +1160,11 @@ function getBackgroundColor(
         ) {
 
             return {
+
                 r: 255,
                 g: 255,
                 b: 255
+
             };
 
         }
@@ -1239,10 +1189,12 @@ function getBackgroundColor(
 
         };
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
         console.warn(
-            "Background color failed:",
+            "Background sampling error:",
             error
         );
 
@@ -1250,9 +1202,7 @@ function getBackgroundColor(
         return {
 
             r: 255,
-
             g: 255,
-
             b: 255
 
         };
@@ -1263,10 +1213,10 @@ function getBackgroundColor(
 
 
 /* =========================================================
-   DRAW TRANSLATED LINE
+   DRAW TRANSLATED TEXT
    ========================================================= */
 
-function drawTranslatedLine(
+function pdfDrawTranslatedText(
     pdf,
     canvas,
     line,
@@ -1325,22 +1275,30 @@ function drawTranslatedLine(
 
 
     /*
-       Small cover area around the original text.
+       Background.
     */
 
-    const pad =
+    const bg =
+        pdfGetBackgroundColor(
+            canvas,
+            line
+        );
+
+
+    /*
+       Small padding.
+    */
+
+    const padding =
         Math.max(
             1,
             height * 0.10
         );
 
 
-    const bg =
-        getBackgroundColor(
-            canvas,
-            line
-        );
-
+    /*
+       Cover original text.
+    */
 
     pdf.setFillColor(
 
@@ -1351,38 +1309,40 @@ function drawTranslatedLine(
     );
 
 
-    /*
-       Cover only OCR text region.
-    */
-
     pdf.rect(
 
         Math.max(
             0,
-            x - pad
+            x - padding
         ),
 
         Math.max(
             0,
-            y - pad
+            y - padding
         ),
 
         Math.min(
-            width + pad * 2,
+            width +
+            padding * 2,
+
             pageWidth -
             Math.max(
                 0,
-                x - pad
+                x - padding
             )
+
         ),
 
         Math.min(
-            height + pad * 2,
+            height +
+            padding * 2,
+
             pageHeight -
             Math.max(
                 0,
-                y - pad
+                y - padding
             )
+
         ),
 
         "F"
@@ -1391,7 +1351,7 @@ function drawTranslatedLine(
 
 
     /*
-       Estimate font size.
+       Font size.
     */
 
     let fontSize =
@@ -1399,11 +1359,14 @@ function drawTranslatedLine(
             5,
             Math.min(
                 30,
-                height *
-                0.70
+                height * 0.70
             )
         );
 
+
+    /*
+       Long translation -> smaller font.
+    */
 
     const originalLength =
         Math.max(
@@ -1463,52 +1426,29 @@ function drawTranslatedLine(
 
 
     /*
-       Wrap translated text.
+       Wrap.
     */
 
-    const textWidth =
+    const availableWidth =
         Math.max(
             10,
             width -
-            pad * 2
+            padding * 2
         );
 
 
     let wrapped =
         pdf.splitTextToSize(
+
             translated,
-            textWidth
+
+            availableWidth
+
         );
 
 
     /*
-       Don't allow huge expansion.
-    */
-
-    if (
-        wrapped.length > 3
-    ) {
-
-        fontSize *=
-            0.75;
-
-
-        pdf.setFontSize(
-            fontSize
-        );
-
-
-        wrapped =
-            pdf.splitTextToSize(
-                translated,
-                textWidth
-            );
-
-    }
-
-
-    /*
-       Keep at most 3 lines.
+       Maximum 3 lines.
     */
 
     wrapped =
@@ -1519,15 +1459,18 @@ function drawTranslatedLine(
 
 
     /*
-       Baseline.
+       Position.
     */
 
-    const baseline =
+    const textX =
+        x + padding;
+
+
+    const textY =
         y +
         Math.max(
             fontSize,
-            height *
-            0.78
+            height * 0.78
         );
 
 
@@ -1535,14 +1478,14 @@ function drawTranslatedLine(
 
         wrapped,
 
-        x + pad,
+        textX,
 
-        baseline,
+        textY,
 
         {
 
             maxWidth:
-                textWidth
+                availableWidth
 
         }
 
@@ -1552,10 +1495,10 @@ function drawTranslatedLine(
 
 
 /* =========================================================
-   CREATE PDF
+   CREATE OUTPUT PDF
    ========================================================= */
 
-function createOutputPDF(
+function pdfCreateOutputDocument(
     width,
     height
 ) {
@@ -1589,367 +1532,37 @@ function createOutputPDF(
 
 
 /* =========================================================
-   PROCESS PAGE
+   PROCESS PDF
    ========================================================= */
 
-async function processPage(
-    pdfDocument,
-    pageNumber,
-    totalPages,
-    outputPdf
-) {
-
-    setStatus(
-
-        `📄 Loading page ${pageNumber} of ${totalPages}...`
-
-    );
-
-
-    const page =
-        await pdfDocument.getPage(
-            pageNumber
-        );
-
-
-    const originalViewport =
-        page.getViewport({
-            scale: 1
-        });
-
-
-    const pageWidth =
-        originalViewport.width;
-
-
-    const pageHeight =
-        originalViewport.height;
-
-
-    /*
-       Render page.
-    */
-
-    setStatus(
-
-        `🖼️ Rendering page ${pageNumber} of ${totalPages}...`
-
-    );
-
-
-    const rendered =
-        await renderPage(
-            page
-        );
-
-
-    const canvas =
-        rendered.canvas;
-
-
-    /*
-       OCR.
-    */
-
-    const data =
-        await recognizePage(
-
-            canvas,
-
-            pageNumber,
-
-            totalPages
-
-        );
-
-
-    const lines =
-        getLines(
-            data
-        );
-
-
-    console.log(
-
-        `Page ${pageNumber}:`,
-        lines.length,
-        "OCR lines"
-
-    );
-
-
-    /*
-       Translate lines.
-    */
-
-    const translatedLines =
-        [];
-
-
-    for (
-        let i = 0;
-        i < lines.length;
-        i++
-    ) {
-
-        const line =
-            lines[i];
-
-
-        setStatus(
-
-            `🌎 Translating page ${pageNumber}/${totalPages} — ` +
-            `${i + 1}/${lines.length}`
-
-        );
-
-
-        let translated =
-            "";
-
-
-        try {
-
-            translated =
-                await translateLine(
-                    line.text
-                );
-
-
-            /*
-               If API gives no result, keep original.
-            */
-
-            if (
-                !translated
-            ) {
-
-                translated =
-                    line.text;
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-
-                "Line translation failed:",
-                line.text,
-                error
-
-            );
-
-
-            /*
-               Don't destroy the original content if one
-               translation request fails.
-            */
-
-            translated =
-                line.text;
-
-        }
-
-
-        translatedLines.push({
-
-            ...line,
-
-            translated
-
-        });
-
-
-        /*
-           Update progress.
-
-           OCR/translation account for roughly 5-90%.
-        */
-
-        const pageProgress =
-            10 +
-            (
-                (
-                    (
-                        pageNumber - 1
-                    ) +
-                    (
-                        (
-                            i + 1
-                        ) /
-                        Math.max(
-                            1,
-                            lines.length
-                        )
-                    )
-                ) /
-                totalPages
-            ) *
-            80;
-
-
-        setProgress(
-            pageProgress
-        );
-
-
-        /*
-           Allow browser repaint.
-        */
-
-        await new Promise(
-            resolve =>
-                setTimeout(
-                    resolve,
-                    5
-                )
-        );
-
-    }
-
-
-    /*
-       Add new page after first.
-    */
-
-    if (
-        pageNumber > 1
-    ) {
-
-        outputPdf.addPage(
-
-            [
-                pageWidth,
-                pageHeight
-            ]
-
-        );
-
-    }
-
-
-    /*
-       Original page as background.
-    */
-
-    setStatus(
-
-        `🎨 Preserving original layout of page ${pageNumber}...`
-
-    );
-
-
-    const pageImage =
-        canvas.toDataURL(
-            "image/jpeg",
-            JPEG_QUALITY
-        );
-
-
-    outputPdf.addImage(
-
-        pageImage,
-
-        "JPEG",
-
-        0,
-
-        0,
-
-        pageWidth,
-
-        pageHeight,
-
-        undefined,
-
-        "FAST"
-
-    );
-
-
-    /*
-       Overlay translations.
-    */
-
-    setStatus(
-
-        `✏️ Placing translated text on page ${pageNumber}...`
-
-    );
-
-
-    for (
-        const line
-        of translatedLines
-    ) {
-
-        drawTranslatedLine(
-
-            outputPdf,
-
-            canvas,
-
-            line,
-
-            line.translated,
-
-            pageWidth,
-
-            pageHeight
-
-        );
-
-    }
-
-
-    setProgress(
-
-        Math.round(
-            (
-                pageNumber /
-                totalPages
-            ) * 100
-        )
-
-    );
-
-
-    return {
-
-        pageNumber,
-
-        lines:
-            lines.length
-
-    };
-
-}
-
-
-/* =========================================================
-   MAIN PDF PROCESSOR
-   ========================================================= */
-
-async function processPDF(
+async function pdfProcessFile(
     file
 ) {
 
+    pdfClearError();
+
+
+    pdfCheckLibraries();
+
+
     console.log(
-        "Starting PDF processing:",
+        "Processing file:",
         file.name
     );
 
 
-    checkLibraries();
+    /*
+       Show immediate feedback.
+    */
 
+    pdfSetStatus(
 
-    setStatus(
-        "📥 PDF selected: " +
-        file.name
+        `📥 Selected: ${file.name}`
+
     );
 
 
-    setProgress(
+    pdfSetProgress(
         2
     );
 
@@ -1959,7 +1572,7 @@ async function processPDF(
     */
 
     const pdf =
-        await loadPDF(
+        await pdfLoadDocument(
             file
         );
 
@@ -1968,15 +1581,15 @@ async function processPDF(
         pdf.numPages;
 
 
-    setStatus(
+    pdfSetStatus(
 
-        `📄 PDF loaded successfully — ${totalPages} page${totalPages === 1 ? "" : "s"}`
+        `📄 PDF loaded — ${totalPages} page${totalPages === 1 ? "" : "s"}`
 
     );
 
 
     /*
-       Get first page size.
+       First page determines page size.
     */
 
     const firstPage =
@@ -1987,45 +1600,395 @@ async function processPDF(
 
     const firstViewport =
         firstPage.getViewport({
+
             scale: 1
+
         });
 
 
+    const pageWidth =
+        firstViewport.width;
+
+
+    const pageHeight =
+        firstViewport.height;
+
+
     /*
-       Create output document.
+       Create output PDF.
     */
 
     const outputPdf =
-        createOutputPDF(
+        pdfCreateOutputDocument(
 
-            firstViewport.width,
+            pageWidth,
 
-            firstViewport.height
+            pageHeight
 
         );
 
 
     /*
-       Process pages.
+       Create ONE OCR worker for the whole PDF.
     */
 
-    for (
-        let pageNumber = 1;
-        pageNumber <= totalPages;
-        pageNumber++
-    ) {
+    const worker =
+        await pdfCreateOCRWorker();
 
-        await processPage(
 
-            pdf,
+    try {
 
-            pageNumber,
+        /*
+           Process each page.
+        */
 
-            totalPages,
+        for (
+            let pageNumber = 1;
+            pageNumber <= totalPages;
+            pageNumber++
+        ) {
 
-            outputPdf
+            console.log(
+                "Processing page:",
+                pageNumber
+            );
 
-        );
+
+            /*
+               Get page.
+            */
+
+            const page =
+                await pdf.getPage(
+                    pageNumber
+                );
+
+
+            /*
+               Page size.
+            */
+
+            const viewport =
+                page.getViewport({
+
+                    scale: 1
+
+                });
+
+
+            const currentWidth =
+                viewport.width;
+
+
+            const currentHeight =
+                viewport.height;
+
+
+            /*
+               New page except first.
+            */
+
+            if (
+                pageNumber > 1
+            ) {
+
+                outputPdf.addPage(
+
+                    [
+                        currentWidth,
+                        currentHeight
+                    ]
+
+                );
+
+            }
+
+
+            /*
+               Render.
+            */
+
+            pdfSetStatus(
+
+                `🖼️ Rendering page ${pageNumber} of ${totalPages}...`
+
+            );
+
+
+            const rendered =
+                await pdfRenderPage(
+                    page
+                );
+
+
+            const canvas =
+                rendered.canvas;
+
+
+            /*
+               OCR.
+            */
+
+            const ocrData =
+                await pdfOCRPage(
+
+                    worker,
+
+                    canvas,
+
+                    pageNumber,
+
+                    totalPages
+
+                );
+
+
+            const lines =
+                pdfGetOCRLines(
+                    ocrData
+                );
+
+
+            console.log(
+
+                `Page ${pageNumber}: ${lines.length} OCR lines`
+
+            );
+
+
+            /*
+               Add original page FIRST.
+
+               This preserves the complete original
+               visual layout.
+            */
+
+            const imageData =
+                canvas.toDataURL(
+
+                    "image/jpeg",
+
+                    PDF_JPEG_QUALITY
+
+                );
+
+
+            outputPdf.addImage(
+
+                imageData,
+
+                "JPEG",
+
+                0,
+
+                0,
+
+                currentWidth,
+
+                currentHeight,
+
+                undefined,
+
+                "FAST"
+
+            );
+
+
+            /*
+               Translate OCR lines.
+            */
+
+            const translatedLines =
+                [];
+
+
+            for (
+                let i = 0;
+                i < lines.length;
+                i++
+            ) {
+
+                const line =
+                    lines[i];
+
+
+                pdfSetStatus(
+
+                    `🌎 Translating page ${pageNumber}/${totalPages} — ` +
+                    `${i + 1}/${lines.length}`
+
+                );
+
+
+                let translated;
+
+
+                try {
+
+                    translated =
+                        await pdfTranslateText(
+                            line.text
+                        );
+
+
+                } catch (
+                    error
+                ) {
+
+                    console.warn(
+
+                        "Translation failed:",
+                        line.text,
+                        error
+
+                    );
+
+
+                    /*
+                       Keep original OCR text if
+                       individual API request fails.
+                    */
+
+                    translated =
+                        line.text;
+
+                }
+
+
+                if (
+                    !translated
+                ) {
+
+                    translated =
+                        line.text;
+
+                }
+
+
+                translatedLines.push({
+
+                    ...line,
+
+                    translated
+
+                });
+
+
+                /*
+                   Progress.
+                */
+
+                const progress =
+                    10 +
+                    (
+                        (
+                            (
+                                pageNumber -
+                                1
+                            ) +
+                            (
+                                (
+                                    i + 1
+                                ) /
+                                Math.max(
+                                    1,
+                                    lines.length
+                                )
+                            )
+                        ) /
+                        totalPages
+                    ) *
+                    85;
+
+
+                pdfSetProgress(
+                    progress
+                );
+
+
+                /*
+                   Allow browser UI to refresh.
+                */
+
+                await new Promise(
+                    resolve =>
+                        setTimeout(
+                            resolve,
+                            2
+                        )
+                );
+
+            }
+
+
+            /*
+               Overlay translations.
+            */
+
+            pdfSetStatus(
+
+                `✏️ Applying translation to page ${pageNumber}...`
+
+            );
+
+
+            for (
+                const item
+                of translatedLines
+            ) {
+
+                pdfDrawTranslatedText(
+
+                    outputPdf,
+
+                    canvas,
+
+                    item,
+
+                    item.translated,
+
+                    currentWidth,
+
+                    currentHeight
+
+                );
+
+            }
+
+
+            pdfSetProgress(
+
+                Math.round(
+                    (
+                        pageNumber /
+                        totalPages
+                    ) * 95
+                )
+
+            );
+
+        }
+
+    } finally {
+
+        /*
+           Always terminate worker.
+        */
+
+        try {
+
+            await worker.terminate();
+
+        } catch (
+            error
+        ) {
+
+            console.warn(
+                "Could not terminate OCR worker:",
+                error
+            );
+
+        }
 
     }
 
@@ -2039,7 +2002,7 @@ async function processPDF(
         outputPdf.setProperties({
 
             title:
-                "Translated " +
+                "Translated - " +
                 file.name,
 
             subject:
@@ -2053,10 +2016,12 @@ async function processPDF(
 
         });
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
         console.warn(
-            "Metadata error:",
+            "PDF metadata error:",
             error
         );
 
@@ -2067,7 +2032,7 @@ async function processPDF(
        Filename.
     */
 
-    const cleanName =
+    const baseName =
         file.name.replace(
             /\.pdf$/i,
             ""
@@ -2076,39 +2041,35 @@ async function processPDF(
 
     const outputName =
         "translated_" +
-        cleanName +
+        baseName +
         ".pdf";
 
 
     /*
-       Finish.
+       Save.
     */
 
-    setStatus(
+    pdfSetStatus(
         "💾 Creating translated PDF..."
     );
 
 
-    setProgress(
+    pdfSetProgress(
         98
     );
 
-
-    /*
-       Download.
-    */
 
     outputPdf.save(
         outputName
     );
 
 
-    setProgress(
+    pdfSetProgress(
         100
     );
 
 
-    setStatus(
+    pdfSetStatus(
 
         `✅ Complete! Downloaded ${outputName}`
 
@@ -2116,48 +2077,25 @@ async function processPDF(
 
 
     if (
-        translationStatus
+        pdfTranslationStatus
     ) {
 
-        translationStatus.textContent =
-            "PDF translated successfully.";
+        pdfTranslationStatus.textContent =
+            "PDF translation completed.";
 
     }
 
 
-    /*
-       Put OCR text into source box only if it is
-       reasonably small.
-
-       This does NOT interfere with app.js translation.
-    */
-
-    try {
-
-        if (
-            sourceText
-        ) {
-
-            /*
-               We intentionally don't overwrite a user's
-               existing text here.
-            */
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            error
-        );
-
-    }
+    console.log(
+        "PDF processing completed:",
+        outputName
+    );
 
 }
 
 
 /* =========================================================
-   PDF INPUT EVENT
+   FILE SELECT EVENT
    ========================================================= */
 
 if (
@@ -2165,7 +2103,7 @@ if (
 ) {
 
     console.log(
-        "PDF input event listener attached."
+        "PDF input found."
     );
 
 
@@ -2174,30 +2112,32 @@ if (
         async function(event) {
 
             console.log(
-                "PDF INPUT CHANGE EVENT"
+                "===================================="
             );
-
-
-            clearError();
-
-
-            const files =
-                event.target.files;
-
 
             console.log(
-                "Selected files:",
-                files
+                "PDF FILE CHANGE EVENT FIRED"
             );
+
+            console.log(
+                "===================================="
+            );
+
+
+            pdfClearError();
+
+
+            const file =
+                event.target.files &&
+                event.target.files[0];
 
 
             if (
-                !files ||
-                !files.length
+                !file
             ) {
 
-                console.log(
-                    "No PDF selected."
+                console.warn(
+                    "No file selected."
                 );
 
                 return;
@@ -2205,23 +2145,35 @@ if (
             }
 
 
-            const file =
-                files[0];
+            console.log(
+                "FILE:",
+                file
+            );
 
 
             console.log(
-                "Selected PDF:",
-                file.name,
-                file.type,
+                "NAME:",
+                file.name
+            );
+
+
+            console.log(
+                "TYPE:",
+                file.type
+            );
+
+
+            console.log(
+                "SIZE:",
                 file.size
             );
 
 
             /*
-               IMMEDIATELY show something on screen.
+               Immediate visible response.
             */
 
-            setStatus(
+            pdfSetStatus(
 
                 `📥 PDF selected: ${file.name}`
 
@@ -2230,19 +2182,32 @@ if (
 
             try {
 
-                await processPDF(
+                await pdfProcessFile(
                     file
                 );
 
-            } catch (error) {
+            } catch (
+                error
+            ) {
 
                 console.error(
-                    "FULL PDF ERROR:",
+                    "===================================="
+                );
+
+                console.error(
+                    "PDF PROCESSING ERROR"
+                );
+
+                console.error(
                     error
                 );
 
+                console.error(
+                    "===================================="
+                );
 
-                showError(
+
+                pdfShowError(
 
                     error &&
                     error.message
@@ -2254,7 +2219,7 @@ if (
             } finally {
 
                 /*
-                   Allow same PDF to be selected again.
+                   Allow selecting the same file again.
                 */
 
                 event.target.value =
@@ -2265,10 +2230,51 @@ if (
         }
     );
 
+
 } else {
 
     console.error(
-        "CRITICAL: #pdfInput was not found."
+        "CRITICAL ERROR: #pdfInput NOT FOUND."
     );
 
 }
+
+
+/* =========================================================
+   FINAL DIAGNOSTICS
+   ========================================================= */
+
+console.log(
+    "PDF input:",
+    pdfInput
+);
+
+console.log(
+    "PDF.js:",
+    typeof pdfjsLib !== "undefined"
+        ? "READY"
+        : "MISSING"
+);
+
+console.log(
+    "Tesseract:",
+    typeof Tesseract !== "undefined"
+        ? "READY"
+        : "MISSING"
+);
+
+console.log(
+    "jsPDF:",
+    typeof window.jspdf !== "undefined" &&
+    typeof window.jspdf.jsPDF === "function"
+        ? "READY"
+        : "MISSING"
+);
+
+console.log(
+    "Dhiren Translate PDF module ready."
+);
+
+console.log(
+    "===================================="
+);
