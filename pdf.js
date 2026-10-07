@@ -17,14 +17,19 @@
 
  Translation API:
     /api/?sl=SOURCE&tl=TARGET&q=TEXT
+
+ IMPORTANT:
+    - Preserve OCR line positions
+    - Preserve multiple spaces where OCR provides them
+    - Avoid translated text overlap
+    - Maintain approximate original font size
+    - Maintain approximate boldness
 ===========================================================
 */
-
 
 console.log("====================================");
 console.log("Dhiren Translate PDF module starting");
 console.log("====================================");
-
 
 /* =========================================================
    ELEMENTS
@@ -37,34 +42,22 @@ const pdfStatus =
     document.getElementById("ocrStatus");
 
 const pdfProgressContainer =
-    document.getElementById(
-        "ocrProgressContainer"
-    );
+    document.getElementById("ocrProgressContainer");
 
 const pdfProgress =
-    document.getElementById(
-        "ocrProgress"
-    );
+    document.getElementById("ocrProgress");
 
 const pdfError =
-    document.getElementById(
-        "errorMessage"
-    );
+    document.getElementById("errorMessage");
 
 const pdfTranslationStatus =
-    document.getElementById(
-        "translationStatus"
-    );
+    document.getElementById("translationStatus");
 
 const pdfSourceLanguage =
-    document.getElementById(
-        "sourceLanguage"
-    );
+    document.getElementById("sourceLanguage");
 
 const pdfTargetLanguage =
-    document.getElementById(
-        "targetLanguage"
-    );
+    document.getElementById("targetLanguage");
 
 
 /* =========================================================
@@ -87,28 +80,33 @@ const PDF_SUPPORTED_LANGUAGES = {
 
     hi: {
         name: "Hindi",
+
         fontFile:
             "/fonts/NotoSansDevanagari-Regular.ttf",
+
         fontName:
             "NotoSansDevanagari"
     },
 
     mr: {
         name: "Marathi",
+
         fontFile:
             "/fonts/NotoSansDevanagari-Regular.ttf",
+
         fontName:
             "NotoSansDevanagari"
     },
 
     gu: {
         name: "Gujarati",
+
         fontFile:
             "/fonts/NotoSansGujarati-Regular.ttf",
+
         fontName:
             "NotoSansGujarati"
     }
-
 };
 
 
@@ -192,7 +190,6 @@ const PDF_OCR_LANGUAGE_MAP = {
     ko: "kor",
 
     zh: "chi_sim"
-
 };
 
 
@@ -257,7 +254,6 @@ function pdfSetProgress(value) {
             )
         );
 
-
     if (pdfProgressContainer) {
 
         pdfProgressContainer.classList.remove(
@@ -265,20 +261,12 @@ function pdfSetProgress(value) {
         );
     }
 
-
     if (pdfProgress) {
 
         pdfProgress.style.width =
             safeValue + "%";
 
-        /*
-         * If progress element is a native
-         * progress element.
-         */
-
-        if (
-            "value" in pdfProgress
-        ) {
+        if ("value" in pdfProgress) {
 
             pdfProgress.value =
                 safeValue;
@@ -300,17 +288,15 @@ function pdfHideProgress() {
         );
     }
 
-
     if (pdfProgress) {
 
         pdfProgress.style.width =
             "0%";
 
-        if (
-            "value" in pdfProgress
-        ) {
+        if ("value" in pdfProgress) {
 
-            pdfProgress.value = 0;
+            pdfProgress.value =
+                0;
         }
     }
 }
@@ -345,7 +331,6 @@ function pdfShowError(message) {
         message
     );
 
-
     if (pdfError) {
 
         pdfError.textContent =
@@ -355,7 +340,6 @@ function pdfShowError(message) {
             "hidden"
         );
     }
-
 
     pdfSetStatus(
         "❌ " + String(message)
@@ -373,24 +357,20 @@ function pdfCheckLibraries() {
         "Checking PDF libraries..."
     );
 
-
     console.log(
         "PDF.js:",
         typeof window.pdfjsLib
     );
-
 
     console.log(
         "Tesseract:",
         typeof window.Tesseract
     );
 
-
     console.log(
         "jsPDF:",
         typeof window.jspdf
     );
-
 
     if (
         typeof window.pdfjsLib ===
@@ -402,7 +382,6 @@ function pdfCheckLibraries() {
         );
     }
 
-
     if (
         typeof window.Tesseract ===
         "undefined"
@@ -412,7 +391,6 @@ function pdfCheckLibraries() {
             "Tesseract.js is not loaded."
         );
     }
-
 
     if (
         typeof window.jspdf ===
@@ -424,7 +402,6 @@ function pdfCheckLibraries() {
         );
     }
 
-
     if (
         typeof window.jspdf.jsPDF !==
         "function"
@@ -434,7 +411,6 @@ function pdfCheckLibraries() {
             "jsPDF constructor is not available."
         );
     }
-
 
     console.log(
         "All PDF libraries loaded successfully."
@@ -456,12 +432,10 @@ function pdfInitializePDFJS() {
         return;
     }
 
-
     window.pdfjsLib
         .GlobalWorkerOptions
         .workerSrc =
-            PDF_WORKER_URL;
-
+        PDF_WORKER_URL;
 
     console.log(
         "PDF.js worker configured."
@@ -480,7 +454,6 @@ function pdfGetSourceLanguage() {
         return "auto";
     }
 
-
     const value =
         String(
             pdfSourceLanguage.value ||
@@ -488,7 +461,6 @@ function pdfGetSourceLanguage() {
         )
         .trim()
         .toLowerCase();
-
 
     return value || "auto";
 }
@@ -505,7 +477,6 @@ function pdfGetTargetLanguage() {
         return "";
     }
 
-
     const value =
         String(
             pdfTargetLanguage.value ||
@@ -513,7 +484,6 @@ function pdfGetTargetLanguage() {
         )
         .trim()
         .toLowerCase();
-
 
     return value;
 }
@@ -528,10 +498,10 @@ function pdfNormalizeLanguage(language) {
     return String(
         language || ""
     )
-        .trim()
-        .toLowerCase()
-        .split("-")[0]
-        .split("_")[0];
+    .trim()
+    .toLowerCase()
+    .split("-")[0]
+    .split("_")[0];
 }
 
 
@@ -545,7 +515,6 @@ function pdfGetPDFLanguageConfig() {
         pdfNormalizeLanguage(
             pdfGetTargetLanguage()
         );
-
 
     return (
         PDF_SUPPORTED_LANGUAGES[target] ||
@@ -565,7 +534,6 @@ function pdfGetOCRLanguage() {
             pdfGetSourceLanguage()
         );
 
-
     return (
         PDF_OCR_LANGUAGE_MAP[source] ||
         "eng"
@@ -577,9 +545,7 @@ function pdfGetOCRLanguage() {
    LOAD FONT
    ========================================================= */
 
-async function pdfLoadFont(
-    fontFile
-) {
+async function pdfLoadFont(fontFile) {
 
     if (
         pdfFontCache[fontFile]
@@ -593,12 +559,10 @@ async function pdfLoadFont(
         return pdfFontCache[fontFile];
     }
 
-
     console.log(
         "Loading PDF font:",
         fontFile
     );
-
 
     const response =
         await fetch(
@@ -608,7 +572,6 @@ async function pdfLoadFont(
                 cache: "force-cache"
             }
         );
-
 
     if (!response.ok) {
 
@@ -621,10 +584,8 @@ async function pdfLoadFont(
         );
     }
 
-
     const buffer =
         await response.arrayBuffer();
-
 
     if (
         !buffer ||
@@ -637,18 +598,13 @@ async function pdfLoadFont(
         );
     }
 
-
     const bytes =
-        new Uint8Array(
-            buffer
-        );
-
+        new Uint8Array(buffer);
 
     let binary = "";
 
     const chunkSize =
         0x8000;
-
 
     for (
         let i = 0;
@@ -665,21 +621,17 @@ async function pdfLoadFont(
                 )
             );
 
-
         binary +=
             String.fromCharCode(
                 ...chunk
             );
     }
 
-
     const base64 =
         btoa(binary);
 
-
     pdfFontCache[fontFile] =
         base64;
-
 
     console.log(
         "Font loaded successfully:",
@@ -687,7 +639,6 @@ async function pdfLoadFont(
         "bytes:",
         buffer.byteLength
     );
-
 
     return base64;
 }
@@ -707,7 +658,6 @@ function pdfCreateOutputDocument(
     const jsPDF =
         window.jspdf.jsPDF;
 
-
     const pdf =
         new jsPDF({
 
@@ -716,37 +666,30 @@ function pdfCreateOutputDocument(
                     ? "landscape"
                     : "portrait",
 
-            unit:
-                "pt",
+            unit: "pt",
 
-            format:
-                [
-                    width,
-                    height
-                ],
+            format: [
+                width,
+                height
+            ],
 
-            compress:
-                true
+            compress: true
         });
-
 
     const fontFileName =
         fontInfo.fontFile
             .split("/")
             .pop();
 
-
     console.log(
         "Registering PDF font:",
         fontFileName
     );
 
-
     pdf.addFileToVFS(
         fontFileName,
         fontBase64
     );
-
 
     pdf.addFont(
         fontFileName,
@@ -754,18 +697,15 @@ function pdfCreateOutputDocument(
         "normal"
     );
 
-
     pdf.setFont(
         fontInfo.fontName,
         "normal"
     );
 
-
     console.log(
         "PDF Unicode font registered:",
         fontInfo.fontName
     );
-
 
     return pdf;
 }
@@ -775,23 +715,18 @@ function pdfCreateOutputDocument(
    LOAD PDF
    ========================================================= */
 
-async function pdfLoadDocument(
-    file
-) {
+async function pdfLoadDocument(file) {
 
     pdfSetStatus(
         "📖 Reading PDF..."
     );
 
-
     pdfSetProgress(
         5
     );
 
-
     const buffer =
         await file.arrayBuffer();
-
 
     if (
         !buffer ||
@@ -803,37 +738,28 @@ async function pdfLoadDocument(
         );
     }
 
-
     console.log(
         "PDF bytes:",
         buffer.byteLength
     );
 
-
     const loadingTask =
         window.pdfjsLib.getDocument({
-
             data:
-                new Uint8Array(
-                    buffer
-                )
+                new Uint8Array(buffer)
         });
-
 
     const pdf =
         await loadingTask.promise;
-
 
     console.log(
         "PDF successfully loaded."
     );
 
-
     console.log(
         "PDF pages:",
         pdf.numPages
     );
-
 
     return pdf;
 }
@@ -843,35 +769,28 @@ async function pdfLoadDocument(
    RENDER PDF PAGE
    ========================================================= */
 
-async function pdfRenderPage(
-    page
-) {
+async function pdfRenderPage(page) {
 
     const viewport =
         page.getViewport({
-
             scale:
                 PDF_RENDER_SCALE
         });
-
 
     const canvas =
         document.createElement(
             "canvas"
         );
 
-
     canvas.width =
         Math.ceil(
             viewport.width
         );
 
-
     canvas.height =
         Math.ceil(
             viewport.height
         );
-
 
     const context =
         canvas.getContext(
@@ -882,14 +801,12 @@ async function pdfRenderPage(
             }
         );
 
-
     if (!context) {
 
         throw new Error(
             "Could not create PDF canvas."
         );
     }
-
 
     await page.render({
 
@@ -900,7 +817,6 @@ async function pdfRenderPage(
             viewport
 
     }).promise;
-
 
     return {
 
@@ -922,73 +838,64 @@ async function pdfCreateOCRWorker() {
     const language =
         pdfGetOCRLanguage();
 
-
     console.log(
         "Creating Tesseract worker:",
         language
     );
 
-
     pdfSetStatus(
         "🔤 Loading OCR engine..."
     );
 
-
     const worker =
-        await window.Tesseract.createWorker(
+        await window.Tesseract
+            .createWorker(
+                language,
+                1,
+                {
+                    logger:
+                        function(info) {
 
-            language,
+                            if (
+                                info &&
+                                info.status ===
+                                "loading language"
+                            ) {
 
-            1,
+                                console.log(
+                                    "OCR language loading:",
+                                    Math.round(
+                                        (
+                                            info.progress ||
+                                            0
+                                        ) * 100
+                                    ) + "%"
+                                );
+                            }
 
-            {
+                            if (
+                                info &&
+                                info.status ===
+                                "recognizing text"
+                            ) {
 
-                logger:
-                    function(info) {
-
-                        if (
-                            info &&
-                            info.status ===
-                            "loading language"
-                        ) {
-
-                            console.log(
-                                "OCR language loading:",
-                                Math.round(
-                                    (
-                                        info.progress ||
-                                        0
-                                    ) * 100
-                                ) + "%"
-                            );
+                                console.log(
+                                    "OCR progress:",
+                                    Math.round(
+                                        (
+                                            info.progress ||
+                                            0
+                                        ) * 100
+                                    ) + "%"
+                                );
+                            }
                         }
-
-
-                        if (
-                            info &&
-                            info.status ===
-                            "recognizing text"
-                        ) {
-
-                            console.log(
-                                "OCR progress:",
-                                Math.round(
-                                    (
-                                        info.progress ||
-                                        0
-                                    ) * 100
-                                ) + "%"
-                            );
-                        }
-                    }
-            }
-        );
-
+                }
+            );
 
     console.log(
         "Tesseract worker ready."
     );
-
 
     return worker;
 }
@@ -1006,17 +913,13 @@ async function pdfOCRPage(
 ) {
 
     pdfSetStatus(
-
         `🔍 OCR page ${pageNumber} of ${totalPages}...`
-
     );
-
 
     const result =
         await worker.recognize(
             canvas
         );
-
 
     if (
         !result ||
@@ -1029,12 +932,10 @@ async function pdfOCRPage(
         );
     }
 
-
     console.log(
         "OCR completed for page:",
         pageNumber
     );
-
 
     return result.data;
 }
@@ -1044,9 +945,7 @@ async function pdfOCRPage(
    GET OCR LINES
    ========================================================= */
 
-function pdfGetOCRLines(
-    data
-) {
+function pdfGetOCRLines(data) {
 
     if (
         !data ||
@@ -1057,7 +956,6 @@ function pdfGetOCRLines(
 
         return [];
     }
-
 
     return data.lines
 
@@ -1075,17 +973,38 @@ function pdfGetOCRLines(
         .map(
             function(line) {
 
+                /*
+                 * IMPORTANT:
+                 *
+                 * DO NOT use:
+                 *
+                 * replace(/\s+/g, " ")
+                 *
+                 * because that destroys multiple spaces.
+                 *
+                 * We only remove leading/trailing spaces.
+                 */
+                const originalText =
+                    String(
+                        line.text
+                    )
+                    .replace(
+                        /^[\t ]+/,
+                        ""
+                    )
+                    .replace(
+                        /[\t ]+$/,
+                        ""
+                    );
+
                 return {
 
+                    /*
+                     * Keep the OCR text exactly
+                     * as much as Tesseract provides.
+                     */
                     text:
-                        String(
-                            line.text
-                        )
-                        .replace(
-                            /\s+/g,
-                            " "
-                        )
-                        .trim(),
+                        originalText,
 
                     confidence:
                         Number(
@@ -1143,19 +1062,15 @@ function API_BASE_FOR_PDF(
 ) {
 
     return (
-
         "/api/?" +
-
         "sl=" +
         encodeURIComponent(
             sourceLanguage
         ) +
-
         "&tl=" +
         encodeURIComponent(
             targetLanguage
         ) +
-
         "&q=" +
         encodeURIComponent(
             text
@@ -1168,33 +1083,23 @@ function API_BASE_FOR_PDF(
    TRANSLATE TEXT
    ========================================================= */
 
-async function pdfTranslateText(
-    text
-) {
+async function pdfTranslateText(text) {
 
     const sourceLanguage =
         pdfGetSourceLanguage();
 
-
     const targetLanguage =
         pdfGetTargetLanguage();
-
 
     const cleanText =
         String(
             text || ""
         ).trim();
 
-
     if (!cleanText) {
 
         return "";
     }
-
-
-    /*
-     * Same language.
-     */
 
     if (
         pdfNormalizeLanguage(
@@ -1208,48 +1113,35 @@ async function pdfTranslateText(
         return cleanText;
     }
 
-
     const url =
         API_BASE_FOR_PDF(
-
             sourceLanguage,
-
             targetLanguage,
-
             cleanText
-
         );
-
 
     console.log(
         "Translation request:",
         cleanText
     );
 
-
     console.log(
         "Translation URL:",
         url
     );
 
-
     let response;
-
 
     try {
 
         response =
             await fetch(
-
                 url,
-
                 {
-
                     method:
                         "GET",
 
                     headers: {
-
                         Accept:
                             "application/json,text/plain,*/*"
                     }
@@ -1266,21 +1158,17 @@ async function pdfTranslateText(
         );
     }
 
-
     console.log(
         "Translation HTTP status:",
         response.status
     );
-
 
     const contentType =
         response.headers.get(
             "content-type"
         ) || "";
 
-
     let data;
-
 
     if (
         contentType.includes(
@@ -1308,21 +1196,16 @@ async function pdfTranslateText(
             await response.text();
     }
 
-
     console.log(
         "Translation API response:",
         data
     );
 
-
-    if (
-        !response.ok
-    ) {
+    if (!response.ok) {
 
         let errorMessage =
             "Translation API error: HTTP " +
             response.status;
-
 
         if (
             typeof data ===
@@ -1350,28 +1233,22 @@ async function pdfTranslateText(
                 data.error;
         }
 
-
         throw new Error(
             errorMessage
         );
     }
-
 
     const translated =
         pdfExtractTranslation(
             data
         );
 
-
-    if (
-        !translated
-    ) {
+    if (!translated) {
 
         throw new Error(
             "Translation API returned an empty translation."
         );
     }
-
 
     return translated;
 }
@@ -1381,9 +1258,7 @@ async function pdfTranslateText(
    EXTRACT TRANSLATION
    ========================================================= */
 
-function pdfExtractTranslation(
-    data
-) {
+function pdfExtractTranslation(data) {
 
     if (
         typeof data ===
@@ -1393,12 +1268,10 @@ function pdfExtractTranslation(
         return data.trim();
     }
 
-
     if (!data) {
 
         return "";
     }
-
 
     const keys = [
 
@@ -1417,7 +1290,6 @@ function pdfExtractTranslation(
         "text"
     ];
 
-
     for (
         const key of keys
     ) {
@@ -1430,11 +1302,6 @@ function pdfExtractTranslation(
             return data[key].trim();
         }
     }
-
-
-    /*
-     * Nested data.
-     */
 
     if (
         data.data !==
@@ -1449,7 +1316,6 @@ function pdfExtractTranslation(
             return data.data.trim();
         }
 
-
         if (
             typeof data.data ===
             "object"
@@ -1460,7 +1326,6 @@ function pdfExtractTranslation(
                     data.data
                 );
 
-
             if (nested) {
 
                 return nested;
@@ -1468,17 +1333,11 @@ function pdfExtractTranslation(
         }
     }
 
-
-    /*
-     * Array response.
-     */
-
     if (
         Array.isArray(data)
     ) {
 
         const parts = [];
-
 
         for (
             const item of data
@@ -1500,10 +1359,7 @@ function pdfExtractTranslation(
                         item
                     );
 
-
-                if (
-                    itemText
-                ) {
+                if (itemText) {
 
                     parts.push(
                         itemText
@@ -1512,12 +1368,10 @@ function pdfExtractTranslation(
             }
         }
 
-
         return parts
             .join(" ")
             .trim();
     }
-
 
     return "";
 }
@@ -1543,17 +1397,14 @@ function pdfGetBackgroundColor(
                 }
             );
 
-
         if (!ctx) {
 
             return {
-
                 r: 255,
                 g: 255,
                 b: 255
             };
         }
-
 
         const x =
             Math.max(
@@ -1563,7 +1414,6 @@ function pdfGetBackgroundColor(
                 )
             );
 
-
         const y =
             Math.max(
                 0,
@@ -1571,7 +1421,6 @@ function pdfGetBackgroundColor(
                     line.y0
                 )
             );
-
 
         const width =
             Math.min(
@@ -1585,10 +1434,8 @@ function pdfGetBackgroundColor(
                 ),
 
                 canvas.width -
-                x
-
+                    x
             );
-
 
         const height =
             Math.min(
@@ -1602,10 +1449,8 @@ function pdfGetBackgroundColor(
                 ),
 
                 canvas.height -
-                y
-
+                    y
             );
-
 
         if (
             width <= 0 ||
@@ -1613,35 +1458,31 @@ function pdfGetBackgroundColor(
         ) {
 
             return {
-
                 r: 255,
                 g: 255,
                 b: 255
             };
         }
 
-
         const image =
             ctx.getImageData(
-
                 x,
                 y,
                 width,
                 height
-
             );
 
-
         let r = 0;
-        let g = 0;
-        let b = 0;
-        let count = 0;
 
+        let g = 0;
+
+        let b = 0;
+
+        let count = 0;
 
         for (
             let i = 0;
-            i <
-            image.data.length;
+            i < image.data.length;
             i += 4
         ) {
 
@@ -1654,11 +1495,6 @@ function pdfGetBackgroundColor(
             const bb =
                 image.data[i + 2];
 
-
-            /*
-             * Count bright pixels.
-             */
-
             if (
                 rr > 180 &&
                 gg > 180 &&
@@ -1666,26 +1502,25 @@ function pdfGetBackgroundColor(
             ) {
 
                 r += rr;
+
                 g += gg;
+
                 b += bb;
 
                 count++;
             }
         }
 
-
         if (
             count === 0
         ) {
 
             return {
-
                 r: 255,
                 g: 255,
                 b: 255
             };
         }
-
 
         return {
 
@@ -1705,7 +1540,6 @@ function pdfGetBackgroundColor(
                 )
         };
 
-
     } catch (
         error
     ) {
@@ -1715,14 +1549,192 @@ function pdfGetBackgroundColor(
             error
         );
 
-
         return {
-
             r: 255,
             g: 255,
             b: 255
         };
     }
+}
+
+
+/* =========================================================
+   DETECT APPROXIMATE BOLD
+   ========================================================= */
+
+function pdfDetectBold(
+    canvas,
+    line
+) {
+
+    try {
+
+        const ctx =
+            canvas.getContext(
+                "2d",
+                {
+                    willReadFrequently:
+                        true
+                }
+            );
+
+        if (!ctx) {
+
+            return false;
+        }
+
+        const sx =
+            Math.max(
+                0,
+                Math.floor(
+                    line.x0
+                )
+            );
+
+        const sy =
+            Math.max(
+                0,
+                Math.floor(
+                    line.y0
+                )
+            );
+
+        const sw =
+            Math.min(
+
+                Math.max(
+                    2,
+                    Math.floor(
+                        line.x1 -
+                        line.x0
+                    )
+                ),
+
+                canvas.width -
+                    sx
+            );
+
+        const sh =
+            Math.min(
+
+                Math.max(
+                    2,
+                    Math.floor(
+                        line.y1 -
+                        line.y0
+                    )
+                ),
+
+                canvas.height -
+                    sy
+            );
+
+        if (
+            sw <= 1 ||
+            sh <= 1
+        ) {
+
+            return false;
+        }
+
+        const pixels =
+            ctx.getImageData(
+                sx,
+                sy,
+                sw,
+                sh
+            ).data;
+
+        let darkPixels =
+            0;
+
+        let totalPixels =
+            0;
+
+        for (
+            let i = 0;
+            i < pixels.length;
+            i += 4
+        ) {
+
+            const r =
+                pixels[i];
+
+            const g =
+                pixels[i + 1];
+
+            const b =
+                pixels[i + 2];
+
+            /*
+             * Ignore very light pixels.
+             */
+            if (
+                r < 130 &&
+                g < 130 &&
+                b < 130
+            ) {
+
+                darkPixels++;
+            }
+
+            totalPixels++;
+        }
+
+        const darkness =
+            darkPixels /
+            Math.max(
+                1,
+                totalPixels
+            );
+
+        /*
+         * Conservative bold detection.
+         */
+        return (
+            darkness > 0.16
+        );
+
+    } catch (
+        error
+    ) {
+
+        console.warn(
+            "Bold detection failed:",
+            error
+        );
+
+        return false;
+    }
+}
+
+
+/* =========================================================
+   PRESERVE SPACING
+   ========================================================= */
+
+/*
+ * OCR sometimes returns multiple spaces.
+ *
+ * We deliberately preserve them here.
+ *
+ * JavaScript strings preserve spaces, but PDF text
+ * rendering can visually compress them depending on
+ * the font.
+ *
+ * This function therefore converts tabs to a
+ * reasonable number of spaces but leaves existing
+ * multiple spaces untouched.
+ */
+function pdfPreserveSpaces(text) {
+
+    return String(
+        text || ""
+    )
+    .replace(
+        /\t/g,
+        "    "
+    );
 }
 
 
@@ -1742,41 +1754,58 @@ function pdfDrawTranslatedText(
 
     if (
         !translated ||
-        !String(translated).trim()
+        !String(
+            translated
+        ).trim()
     ) {
 
         return;
     }
 
 
+    /* =====================================================
+       SCALE
+       ===================================================== */
+
     const scale =
         PDF_RENDER_SCALE;
 
 
-    const x =
-        line.x0 /
-        scale;
+    /* =====================================================
+       ORIGINAL OCR POSITION
+       ===================================================== */
 
+    const x =
+        Number(
+            line.x0 || 0
+        ) / scale;
 
     const y =
-        line.y0 /
-        scale;
-
+        Number(
+            line.y0 || 0
+        ) / scale;
 
     const width =
-        (
-            line.x1 -
-            line.x0
-        ) /
-        scale;
-
+        Math.max(
+            4,
+            Number(
+                line.x1 || 0
+            ) -
+            Number(
+                line.x0 || 0
+            )
+        ) / scale;
 
     const height =
-        (
-            line.y1 -
-            line.y0
-        ) /
-        scale;
+        Math.max(
+            4,
+            Number(
+                line.y1 || 0
+            ) -
+            Number(
+                line.y0 || 0
+            )
+        ) / scale;
 
 
     if (
@@ -1788,9 +1817,96 @@ function pdfDrawTranslatedText(
     }
 
 
+    /* =====================================================
+       TEXT
+       ===================================================== */
+
+    const originalText =
+        String(
+            line.text || ""
+        )
+        .replace(
+            /^[\t ]+/,
+            ""
+        )
+        .replace(
+            /[\t ]+$/,
+            ""
+        );
+
     /*
-     * Background color.
+     * Keep translation spaces.
+     *
+     * IMPORTANT:
+     * We do NOT use:
+     *
+     * replace(/\s+/g, " ")
      */
+    const translatedText =
+        pdfPreserveSpaces(
+            translated
+        )
+        .trim();
+
+
+    if (!translatedText) {
+
+        return;
+    }
+
+
+    /* =====================================================
+       PADDING
+       ===================================================== */
+
+    const padding =
+        Math.max(
+            1,
+            Math.min(
+                2.5,
+                height * 0.07
+            )
+        );
+
+
+    /* =====================================================
+       ORIGINAL TEXT BOX
+       ===================================================== */
+
+    const boxX =
+        Math.max(
+            0,
+            x - padding
+        );
+
+    const boxY =
+        Math.max(
+            0,
+            y - padding
+        );
+
+    const boxWidth =
+        Math.min(
+            width +
+                padding * 2,
+
+            pageWidth -
+                boxX
+        );
+
+    const boxHeight =
+        Math.min(
+            height +
+                padding * 2,
+
+            pageHeight -
+                boxY
+        );
+
+
+    /* =====================================================
+       BACKGROUND
+       ===================================================== */
 
     const bg =
         pdfGetBackgroundColor(
@@ -1798,86 +1914,31 @@ function pdfDrawTranslatedText(
             line
         );
 
-
-    const padding =
-        Math.max(
-            1,
-            height * 0.10
-        );
-
-
-    /*
-     * Cover original text.
-     */
-
     pdf.setFillColor(
-
         bg.r,
         bg.g,
         bg.b
-
     );
-
-
-    const coverX =
-        Math.max(
-            0,
-            x - padding
-        );
-
-
-    const coverY =
-        Math.max(
-            0,
-            y - padding
-        );
-
-
-    const coverWidth =
-        Math.min(
-
-            width +
-            padding * 2,
-
-            pageWidth -
-            coverX
-
-        );
-
-
-    const coverHeight =
-        Math.min(
-
-            height +
-            padding * 2,
-
-            pageHeight -
-            coverY
-
-        );
-
-
-    pdf.rect(
-
-        coverX,
-
-        coverY,
-
-        coverWidth,
-
-        coverHeight,
-
-        "F"
-
-    );
-
 
     /*
-     * IMPORTANT:
-     * Use Unicode Indian-language font.
+     * Cover only the original OCR region.
      *
-     * DO NOT use Helvetica here.
+     * This is intentionally NOT expanded to the next
+     * line because doing so causes neighbouring text
+     * to disappear.
      */
+    pdf.rect(
+        boxX,
+        boxY,
+        boxWidth,
+        boxHeight,
+        "F"
+    );
+
+
+    /* =====================================================
+       FONT
+       ===================================================== */
 
     pdf.setFont(
         fontInfo.fontName,
@@ -1885,84 +1946,273 @@ function pdfDrawTranslatedText(
     );
 
 
-    /*
-     * Calculate font size.
-     */
+    /* =====================================================
+       AVAILABLE AREA
+       ===================================================== */
+
+    const availableWidth =
+        Math.max(
+            8,
+            boxWidth -
+                padding * 2
+        );
+
+    const availableHeight =
+        Math.max(
+            8,
+            boxHeight -
+                padding * 2
+        );
+
+
+    /* =====================================================
+       START FONT SIZE
+       ===================================================== */
 
     let fontSize =
         Math.max(
-            6,
+            5.5,
             Math.min(
-                24,
-                height * 0.78
+                28,
+                height * 0.82
             )
         );
 
+
+    /* =====================================================
+       TRANSLATION LENGTH
+       ===================================================== */
 
     const originalLength =
         Math.max(
             1,
-            String(
-                line.text || ""
-            ).length
+            originalText.length
         );
-
 
     const translatedLength =
         Math.max(
             1,
-            String(
-                translated
-            ).length
+            translatedText.length
         );
 
-
-    const ratio =
+    const lengthRatio =
         translatedLength /
         originalLength;
 
 
+    /*
+     * Only a gentle reduction.
+     *
+     * The actual width measurement below decides
+     * the final font size.
+     */
     if (
-        ratio > 1.5
+        lengthRatio > 1.5
     ) {
 
         fontSize *=
-            0.88;
+            0.96;
     }
 
-
     if (
-        ratio > 2.0
+        lengthRatio > 2.0
     ) {
 
         fontSize *=
-            0.82;
+            0.93;
     }
 
-
     if (
-        ratio > 3.0
+        lengthRatio > 3.0
     ) {
 
         fontSize *=
-            0.75;
+            0.90;
     }
 
 
-    fontSize =
+    /* =====================================================
+       TEXT WIDTH MEASUREMENT
+       ===================================================== */
+
+    function getTextWidth(
+        size
+    ) {
+
+        pdf.setFontSize(
+            size
+        );
+
+        try {
+
+            return pdf.getTextWidth(
+                translatedText
+            );
+
+        } catch (
+            error
+        ) {
+
+            /*
+             * Fallback.
+             *
+             * Spaces are deliberately included.
+             */
+            return (
+                translatedText.length *
+                size *
+                0.52
+            );
+        }
+    }
+
+
+    /* =====================================================
+       FIT TEXT WITHOUT WRAPPING
+       ===================================================== */
+
+    let fittedFontSize =
+        fontSize;
+
+
+    /*
+     * We never wrap an OCR line.
+     *
+     * Wrapping creates another visual line and is the
+     * biggest cause of overlap with the following OCR line.
+     */
+    while (
+        fittedFontSize >
+            5.5 &&
+
+        getTextWidth(
+            fittedFontSize
+        ) >
+            availableWidth
+    ) {
+
+        fittedFontSize -=
+            0.20;
+    }
+
+
+    /* =====================================================
+       EXACT WIDTH-BASED ADJUSTMENT
+       ===================================================== */
+
+    let measuredWidth =
+        getTextWidth(
+            fittedFontSize
+        );
+
+
+    if (
+        measuredWidth >
+        availableWidth
+    ) {
+
+        const ratio =
+            availableWidth /
+            Math.max(
+                1,
+                measuredWidth
+            );
+
+        fittedFontSize =
+            fittedFontSize *
+            Math.max(
+                0.55,
+                Math.min(
+                    1,
+                    ratio
+                )
+            );
+    }
+
+
+    /* =====================================================
+       HEIGHT LIMIT
+       ===================================================== */
+
+    const maxHeightFontSize =
+        availableHeight *
+        0.88;
+
+    fittedFontSize =
+        Math.min(
+            fittedFontSize,
+            maxHeightFontSize
+        );
+
+
+    fittedFontSize =
         Math.max(
-            6,
+            5.5,
             Math.min(
-                24,
-                fontSize
+                28,
+                fittedFontSize
             )
         );
 
 
+    /* =====================================================
+       FINAL WIDTH CHECK
+       ===================================================== */
+
     pdf.setFontSize(
-        fontSize
+        fittedFontSize
     );
 
+    measuredWidth =
+        getTextWidth(
+            fittedFontSize
+        );
+
+
+    if (
+        measuredWidth >
+        availableWidth
+    ) {
+
+        const finalRatio =
+            availableWidth /
+            Math.max(
+                1,
+                measuredWidth
+            );
+
+        fittedFontSize =
+            Math.max(
+                5.5,
+                fittedFontSize *
+                finalRatio
+            );
+
+        pdf.setFontSize(
+            fittedFontSize
+        );
+
+        measuredWidth =
+            getTextWidth(
+                fittedFontSize
+            );
+    }
+
+
+    /* =====================================================
+       BOLD DETECTION
+       ===================================================== */
+
+    const isBold =
+        pdfDetectBold(
+            canvas,
+            line
+        );
+
+
+    /* =====================================================
+       TEXT COLOR
+       ===================================================== */
 
     pdf.setTextColor(
         0,
@@ -1971,170 +2221,227 @@ function pdfDrawTranslatedText(
     );
 
 
+    pdf.setFont(
+        fontInfo.fontName,
+        "normal"
+    );
+
+
+    pdf.setFontSize(
+        fittedFontSize
+    );
+
+
+    /* =====================================================
+       HORIZONTAL POSITION
+       ===================================================== */
+
     /*
-     * Available width.
+     * Keep the translated text at the same left position
+     * as the original OCR text.
      */
-
-    const availableWidth =
-        Math.max(
-            10,
-            width -
-            padding * 2
-        );
+    let textX =
+        boxX +
+        padding;
 
 
-    let wrapped;
-
-
-    try {
-
-        wrapped =
-            pdf.splitTextToSize(
-
-                String(
-                    translated
-                ),
-
-                availableWidth
-
-            );
-
-    } catch (
-        error
+    /*
+     * If somehow the text is still slightly too wide,
+     * move it only inside the box.
+     */
+    if (
+        textX +
+            measuredWidth >
+        pageWidth
     ) {
 
-        console.warn(
-            "PDF text wrapping failed:",
-            error
+        textX =
+            Math.max(
+                0,
+                pageWidth -
+                    measuredWidth -
+                    padding
+            );
+    }
+
+
+    /* =====================================================
+       VERTICAL POSITION
+       ===================================================== */
+
+    /*
+     * Center text vertically in the original OCR box.
+     *
+     * This prevents the translated text from drifting
+     * too high or too low.
+     */
+    const textY =
+        boxY +
+        (
+            boxHeight -
+            fittedFontSize
+        ) / 2 +
+        fittedFontSize *
+            0.82;
+
+
+    /* =====================================================
+       PAGE BOUNDARY PROTECTION
+       ===================================================== */
+
+    const safeTextY =
+        Math.max(
+            fittedFontSize,
+            Math.min(
+                pageHeight - 1,
+                textY
+            )
         );
 
 
-        wrapped = [
-            String(
-                translated
-            )
-        ];
-    }
+    /* =====================================================
+       DRAW NORMAL TEXT
+       ===================================================== */
 
+    pdf.text(
+        translatedText,
+        textX,
+        safeTextY,
+        {
+            baseline:
+                "alphabetic"
+        }
+    );
+
+
+    /* =====================================================
+       SIMULATED BOLD
+       ===================================================== */
 
     if (
-        !Array.isArray(
-            wrapped
-        )
+        isBold
     ) {
-
-        wrapped = [
-            String(
-                wrapped
-            )
-        ];
-    }
-
-
-    /*
-     * Limit lines to the original
-     * OCR line area.
-     */
-
-    const lineHeight =
-        fontSize * 1.12;
-
-
-    const maxLines =
-        Math.max(
-
-            1,
-
-            Math.floor(
-
-                (
-                    height +
-                    fontSize * 0.35
-                ) /
-                lineHeight
-
-            )
-
-        );
-
-
-    wrapped =
-        wrapped.slice(
-            0,
-            maxLines
-        );
-
-
-    /*
-     * Position.
-     */
-
-    const textX =
-        x + padding;
-
-
-    let textY =
-        y +
-        Math.max(
-            fontSize,
-            height * 0.80
-        );
-
-
-    /*
-     * Draw each wrapped line.
-     */
-
-    for (
-        const textLine
-        of wrapped
-    ) {
-
-        if (
-            textLine &&
-            String(
-                textLine
-            ).trim()
-        ) {
-
-            pdf.text(
-
-                String(
-                    textLine
-                ),
-
-                textX,
-
-                textY,
-
-                {
-
-                    baseline:
-                        "alphabetic"
-
-                }
-
-            );
-        }
-
-
-        textY +=
-            lineHeight;
-
 
         /*
-         * Do not draw outside
-         * the page.
+         * Very small offsets.
+         *
+         * This makes the translated text look heavier
+         * without making it noticeably larger.
          */
+        const boldOffset =
+            Math.max(
+                0.10,
+                Math.min(
+                    0.28,
+                    fittedFontSize *
+                        0.016
+                )
+            );
 
-        if (
-            textY >
-            pageHeight
-        ) {
 
-            break;
-        }
+        pdf.text(
+            translatedText,
+            textX +
+                boldOffset,
+            safeTextY,
+            {
+                baseline:
+                    "alphabetic"
+            }
+        );
+
+
+        pdf.text(
+            translatedText,
+            textX,
+            safeTextY +
+                boldOffset *
+                0.30,
+            {
+                baseline:
+                    "alphabetic"
+            }
+        );
     }
+
+
+    /* =====================================================
+       DEBUG
+       ===================================================== */
+
+    console.log(
+        "[PDF TEXT]",
+        {
+
+            original:
+                originalText,
+
+            translated:
+                translatedText,
+
+            originalPosition: {
+
+                x0:
+                    line.x0,
+
+                y0:
+                    line.y0,
+
+                x1:
+                    line.x1,
+
+                y1:
+                    line.y1
+            },
+
+            pdfBox: {
+
+                x:
+                    Number(
+                        boxX.toFixed(2)
+                    ),
+
+                y:
+                    Number(
+                        boxY.toFixed(2)
+                    ),
+
+                width:
+                    Number(
+                        boxWidth.toFixed(2)
+                    ),
+
+                height:
+                    Number(
+                        boxHeight.toFixed(2)
+                    )
+            },
+
+            fontSize:
+                Number(
+                    fittedFontSize.toFixed(
+                        2
+                    )
+                ),
+
+            textWidth:
+                Number(
+                    measuredWidth.toFixed(
+                        2
+                    )
+                ),
+
+            availableWidth:
+                Number(
+                    availableWidth.toFixed(
+                        2
+                    )
+                ),
+
+            bold:
+                isBold
+        }
+    );
 }
 
 
@@ -2150,7 +2457,6 @@ async function pdfProcessFile(
 
     pdfHideProgress();
 
-
     if (!file) {
 
         return;
@@ -2159,25 +2465,20 @@ async function pdfProcessFile(
 
     try {
 
-        /*
-         * Libraries.
-         */
-
         pdfCheckLibraries();
 
 
-        /*
-         * File check.
-         */
+        /* =================================================
+           CHECK FILE
+           ================================================= */
 
         if (
             file.type !==
                 "application/pdf" &&
+
             !file.name
                 .toLowerCase()
-                .endsWith(
-                    ".pdf"
-                )
+                .endsWith(".pdf")
         ) {
 
             throw new Error(
@@ -2186,9 +2487,9 @@ async function pdfProcessFile(
         }
 
 
-        /*
-         * Target language.
-         */
+        /* =================================================
+           CHECK TARGET LANGUAGE
+           ================================================= */
 
         const fontInfo =
             pdfGetPDFLanguageConfig();
@@ -2199,28 +2500,27 @@ async function pdfProcessFile(
             const message =
                 "Translation not available for this language. Please try Hindi, Gujarati or Marathi.";
 
-
             pdfShowError(
                 message
             );
-
 
             pdfSetTranslationStatus(
                 message
             );
 
-
             return;
         }
 
 
+        /* =================================================
+           LANGUAGES
+           ================================================= */
+
         const sourceLanguage =
             pdfGetSourceLanguage();
 
-
         const targetLanguage =
             pdfGetTargetLanguage();
-
 
         const ocrLanguage =
             pdfGetOCRLanguage();
@@ -2230,50 +2530,42 @@ async function pdfProcessFile(
             "===================================="
         );
 
-
         console.log(
             "PDF PROCESSING"
         );
-
 
         console.log(
             "Source:",
             sourceLanguage
         );
 
-
         console.log(
             "Target:",
             targetLanguage
         );
-
 
         console.log(
             "OCR:",
             ocrLanguage
         );
 
-
         console.log(
             "Font:",
             fontInfo.fontFile
         );
-
 
         console.log(
             "===================================="
         );
 
 
-        /*
-         * Load Unicode font BEFORE
-         * creating the PDF.
-         */
+        /* =================================================
+           LOAD FONT
+           ================================================= */
 
         pdfSetStatus(
             `🔤 Loading ${fontInfo.name} PDF font...`
         );
-
 
         pdfSetTranslationStatus(
             `Loading ${fontInfo.name} PDF font...`
@@ -2286,9 +2578,9 @@ async function pdfProcessFile(
             );
 
 
-        /*
-         * Load PDF.
-         */
+        /* =================================================
+           LOAD PDF
+           ================================================= */
 
         const pdf =
             await pdfLoadDocument(
@@ -2310,9 +2602,9 @@ async function pdfProcessFile(
         }
 
 
-        /*
-         * Get first page.
-         */
+        /* =================================================
+           FIRST PAGE
+           ================================================= */
 
         const firstPage =
             await pdf.getPage(
@@ -2322,7 +2614,6 @@ async function pdfProcessFile(
 
         const firstViewport =
             firstPage.getViewport({
-
                 scale:
                     1
             });
@@ -2331,32 +2622,26 @@ async function pdfProcessFile(
         const firstPageWidth =
             firstViewport.width;
 
-
         const firstPageHeight =
             firstViewport.height;
 
 
-        /*
-         * Create output PDF.
-         */
+        /* =================================================
+           OUTPUT PDF
+           ================================================= */
 
         const outputPdf =
             pdfCreateOutputDocument(
-
                 firstPageWidth,
-
                 firstPageHeight,
-
                 fontInfo,
-
                 fontBase64
-
             );
 
 
-        /*
-         * Create ONE OCR worker.
-         */
+        /* =================================================
+           OCR WORKER
+           ================================================= */
 
         pdfSetStatus(
             `🔎 Loading OCR language (${ocrLanguage})...`
@@ -2369,14 +2654,16 @@ async function pdfProcessFile(
 
         try {
 
-            /*
-             * Process every page.
-             */
+            /* =============================================
+               PROCESS EVERY PAGE
+               ============================================= */
 
             for (
                 let pageNumber = 1;
+
                 pageNumber <=
                 totalPages;
+
                 pageNumber++
             ) {
 
@@ -2384,36 +2671,31 @@ async function pdfProcessFile(
                     "===================================="
                 );
 
-
                 console.log(
                     `PAGE ${pageNumber}/${totalPages}`
                 );
-
 
                 console.log(
                     "===================================="
                 );
 
 
-                /*
-                 * Page.
-                 */
+                /* =========================================
+                   PAGE
+                   ========================================= */
 
                 const page =
                     pageNumber === 1
+
                         ? firstPage
+
                         : await pdf.getPage(
                             pageNumber
                         );
 
 
-                /*
-                 * Normal PDF page size.
-                 */
-
                 const pageViewport =
                     page.getViewport({
-
                         scale:
                             1
                     });
@@ -2422,38 +2704,31 @@ async function pdfProcessFile(
                 const pageWidth =
                     pageViewport.width;
 
-
                 const pageHeight =
                     pageViewport.height;
 
 
-                /*
-                 * Add page.
-                 */
+                /* =========================================
+                   ADD PAGE
+                   ========================================= */
 
                 if (
                     pageNumber > 1
                 ) {
 
                     outputPdf.addPage(
-
                         [
                             pageWidth,
                             pageHeight
                         ],
 
                         pageWidth >
-                        pageHeight
+                            pageHeight
+
                             ? "landscape"
+
                             : "portrait"
-
                     );
-
-
-                    /*
-                     * Re-select Unicode font
-                     * after adding page.
-                     */
 
                     outputPdf.setFont(
                         fontInfo.fontName,
@@ -2462,14 +2737,12 @@ async function pdfProcessFile(
                 }
 
 
-                /*
-                 * Render page.
-                 */
+                /* =========================================
+                   RENDER PAGE
+                   ========================================= */
 
                 pdfSetStatus(
-
                     `🖼️ Rendering page ${pageNumber} of ${totalPages}...`
-
                 );
 
 
@@ -2483,58 +2756,45 @@ async function pdfProcessFile(
                     rendered.canvas;
 
 
-                /*
-                 * Add original page image.
-                 */
+                /* =========================================
+                   PAGE IMAGE
+                   ========================================= */
 
                 const imageData =
                     canvas.toDataURL(
-
                         "image/jpeg",
-
                         PDF_JPEG_QUALITY
-
                     );
 
 
                 outputPdf.addImage(
-
                     imageData,
-
                     "JPEG",
-
                     0,
-
                     0,
-
                     pageWidth,
-
                     pageHeight,
-
                     undefined,
-
                     "FAST"
-
                 );
 
 
-                /*
-                 * OCR.
-                 */
+                /* =========================================
+                   OCR
+                   ========================================= */
 
                 const ocrData =
                     await pdfOCRPage(
-
                         worker,
-
                         canvas,
-
                         pageNumber,
-
                         totalPages
-
                     );
 
+
+                /* =========================================
+                   OCR LINES
+                   ========================================= */
 
                 const lines =
                     pdfGetOCRLines(
@@ -2543,17 +2803,13 @@ async function pdfProcessFile(
 
 
                 console.log(
-
                     `OCR lines found on page ${pageNumber}:`,
-
                     lines.length
-
                 );
 
 
                 if (
-                    lines.length ===
-                    0
+                    lines.length === 0
                 ) {
 
                     console.warn(
@@ -2563,14 +2819,13 @@ async function pdfProcessFile(
 
 
                     pdfSetProgress(
-
                         Math.round(
                             (
                                 pageNumber /
                                 totalPages
-                            ) * 95
+                            ) *
+                            95
                         )
-
                     );
 
 
@@ -2578,9 +2833,9 @@ async function pdfProcessFile(
                 }
 
 
-                /*
-                 * Translate each line.
-                 */
+                /* =========================================
+                   TRANSLATE LINES
+                   ========================================= */
 
                 const translatedLines =
                     [];
@@ -2588,7 +2843,9 @@ async function pdfProcessFile(
 
                 for (
                     let i = 0;
+
                     i < lines.length;
+
                     i++
                 ) {
 
@@ -2597,20 +2854,17 @@ async function pdfProcessFile(
 
 
                     pdfSetStatus(
-
                         `🌎 Translating page ${pageNumber}/${totalPages} — ${i + 1}/${lines.length}`
-
                     );
 
 
                     pdfSetTranslationStatus(
-
                         `Translating ${i + 1}/${lines.length}...`
-
                     );
 
 
-                    let translated = "";
+                    let translated =
+                        "";
 
 
                     try {
@@ -2628,28 +2882,21 @@ async function pdfProcessFile(
                             translated
                         );
 
-
                     } catch (
                         translationError
                     ) {
 
                         console.error(
-
                             "Translation failed for line:",
-
                             line.text,
-
                             translationError
-
                         );
 
 
                         /*
-                         * Keep OCR text if
-                         * individual translation
-                         * fails.
+                         * Keep original text if translation
+                         * fails, exactly as before.
                          */
-
                         translated =
                             line.text;
                     }
@@ -2661,19 +2908,16 @@ async function pdfProcessFile(
 
                         translated:
                             translated
-
                     });
 
 
-                    /*
-                     * Progress.
-                     */
+                    /* =====================================
+                       PROGRESS
+                       ===================================== */
 
                     const pageProgress =
                         (
-                            (
-                                i + 1
-                            ) /
+                            (i + 1) /
                             Math.max(
                                 1,
                                 lines.length
@@ -2699,7 +2943,6 @@ async function pdfProcessFile(
 
 
                     pdfSetProgress(
-
                         Math.min(
                             95,
                             Math.max(
@@ -2707,44 +2950,32 @@ async function pdfProcessFile(
                                 overallProgress
                             )
                         )
-
                     );
 
 
-                    /*
-                     * Let browser update UI.
-                     */
-
                     await new Promise(
-
                         function(resolve) {
 
                             setTimeout(
                                 resolve,
                                 5
                             );
-
                         }
-
                     );
                 }
 
 
-                /*
-                 * Draw translations.
-                 */
+                /* =========================================
+                   APPLY TRANSLATION
+                   ========================================= */
 
                 pdfSetStatus(
-
                     `✏️ Applying translation to page ${pageNumber}...`
-
                 );
 
 
                 pdfSetTranslationStatus(
-
                     `Applying translation to page ${pageNumber}...`
-
                 );
 
 
@@ -2768,29 +2999,30 @@ async function pdfProcessFile(
                         pageHeight,
 
                         fontInfo
-
                     );
                 }
 
 
-                pdfSetProgress(
+                /* =========================================
+                   PAGE COMPLETE
+                   ========================================= */
 
+                pdfSetProgress(
                     Math.round(
                         (
                             pageNumber /
                             totalPages
-                        ) * 95
+                        ) *
+                        95
                     )
-
                 );
             }
 
-
         } finally {
 
-            /*
-             * Always terminate OCR worker.
-             */
+            /* =============================================
+               TERMINATE OCR
+               ============================================= */
 
             try {
 
@@ -2805,19 +3037,16 @@ async function pdfProcessFile(
             ) {
 
                 console.warn(
-
                     "Could not terminate Tesseract worker:",
-
                     terminateError
-
                 );
             }
         }
 
 
-        /*
-         * Metadata.
-         */
+        /* =================================================
+           PDF METADATA
+           ================================================= */
 
         try {
 
@@ -2835,7 +3064,6 @@ async function pdfProcessFile(
 
                 creator:
                     "Dhiren Translate"
-
             });
 
         } catch (
@@ -2849,27 +3077,21 @@ async function pdfProcessFile(
         }
 
 
-        /*
-         * Filename.
-         */
+        /* =================================================
+           OUTPUT FILE NAME
+           ================================================= */
 
         const baseName =
             file.name.replace(
-
                 /\.pdf$/i,
-
                 ""
-
             );
 
 
         const safeBaseName =
             baseName.replace(
-
                 /[^a-zA-Z0-9_-]+/g,
-
                 "_"
-
             );
 
 
@@ -2879,9 +3101,9 @@ async function pdfProcessFile(
             ".pdf";
 
 
-        /*
-         * Save.
-         */
+        /* =================================================
+           SAVE
+           ================================================= */
 
         pdfSetStatus(
             "💾 Creating translated PDF..."
@@ -2909,9 +3131,7 @@ async function pdfProcessFile(
 
 
         pdfSetStatus(
-
             `✅ Complete! Downloaded ${outputName}`
-
         );
 
 
@@ -2924,17 +3144,14 @@ async function pdfProcessFile(
             "===================================="
         );
 
-
         console.log(
             "PDF PROCESSING COMPLETED"
         );
-
 
         console.log(
             "Output:",
             outputName
         );
-
 
         console.log(
             "===================================="
@@ -2942,17 +3159,13 @@ async function pdfProcessFile(
 
 
         setTimeout(
-
             function() {
 
                 pdfHideProgress();
 
             },
-
             2000
-
         );
-
 
     } catch (
         error
@@ -2962,16 +3175,13 @@ async function pdfProcessFile(
             "===================================="
         );
 
-
         console.error(
             "PDF PROCESSING ERROR"
         );
 
-
         console.error(
             error
         );
-
 
         console.error(
             "===================================="
@@ -2981,8 +3191,12 @@ async function pdfProcessFile(
         const message =
             error &&
             error.message
+
                 ? error.message
-                : String(error);
+
+                : String(
+                    error
+                );
 
 
         pdfShowError(
@@ -3004,9 +3218,7 @@ async function pdfProcessFile(
    FILE INPUT EVENT
    ========================================================= */
 
-if (
-    pdfInput
-) {
+if (pdfInput) {
 
     console.log(
         "PDF input found."
@@ -3014,20 +3226,16 @@ if (
 
 
     pdfInput.addEventListener(
-
         "change",
-
         async function(event) {
 
             console.log(
                 "===================================="
             );
 
-
             console.log(
                 "PDF FILE CHANGE EVENT FIRED"
             );
-
 
             console.log(
                 "===================================="
@@ -3071,9 +3279,7 @@ if (
 
 
             pdfSetStatus(
-
                 `📥 PDF selected: ${file.name}`
-
             );
 
 
@@ -3097,25 +3303,19 @@ if (
 
                     error &&
                     error.message
-                        ? error.message
-                        : "Unknown PDF processing error."
 
+                        ? error.message
+
+                        : "Unknown PDF processing error."
                 );
 
             } finally {
 
-                /*
-                 * Allow selecting the
-                 * same PDF again.
-                 */
-
                 event.target.value =
                     "";
             }
-
         }
     );
-
 
 } else {
 
@@ -3144,29 +3344,39 @@ console.log(
 
 console.log(
     "PDF.js:",
+
     typeof window.pdfjsLib !==
-        "undefined"
+    "undefined"
+
         ? "READY"
+
         : "MISSING"
 );
 
 
 console.log(
     "Tesseract:",
+
     typeof window.Tesseract !==
-        "undefined"
+    "undefined"
+
         ? "READY"
+
         : "MISSING"
 );
 
 
 console.log(
     "jsPDF:",
+
     typeof window.jspdf !==
         "undefined" &&
+
     typeof window.jspdf.jsPDF ===
         "function"
+
         ? "READY"
+
         : "MISSING"
 );
 
