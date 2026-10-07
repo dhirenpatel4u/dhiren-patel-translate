@@ -18,6 +18,10 @@
       "dest": "/excel-addin.html"
     },
     {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
       "handle": "filesystem"
     }
   ]
