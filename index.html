@@ -120,9 +120,7 @@
 <main class="translator-page">
 
 
-    <!-- =================================================
-         HERO
-         ================================================= -->
+    <!-- HERO -->
 
     <section class="hero">
 
@@ -164,9 +162,7 @@
     <section class="translator-card">
 
 
-        <!-- =================================================
-             LANGUAGE BAR
-             ================================================= -->
+        <!-- LANGUAGE BAR -->
 
         <div class="language-bar">
 
@@ -210,16 +206,14 @@
 
 
 
-        <!-- =================================================
-             TRANSLATION AREA
-             ================================================= -->
+        <!-- TRANSLATION AREA -->
 
         <div class="translation-area">
 
 
-            <!-- =============================================
+            <!-- =========================================
                  SOURCE TEXT
-                 ============================================= -->
+                 ========================================= -->
 
             <div
                 class="translation-box source-box"
@@ -236,9 +230,7 @@
 
 
 
-                <!-- =========================================
-                     OCR STATUS
-                     ========================================= -->
+                <!-- OCR STATUS -->
 
                 <div
                     id="ocrStatus"
@@ -248,10 +240,7 @@
                 ></div>
 
 
-
-                <!-- =========================================
-                     OCR PROGRESS
-                     ========================================= -->
+                <!-- OCR PROGRESS -->
 
                 <div
                     id="ocrProgressContainer"
@@ -268,19 +257,14 @@
 
 
 
-                <!-- =========================================
-                     SOURCE FOOTER
-                     ========================================= -->
+                <!-- SOURCE FOOTER -->
 
                 <div class="box-footer">
 
 
+                    <!-- ONLY IMAGE BUTTON -->
+
                     <div class="source-tools">
-
-
-                        <!-- =================================
-                             IMAGE OCR BUTTON
-                             ================================= -->
 
                         <label
                             for="imageInput"
@@ -306,44 +290,8 @@
                             hidden
                         >
 
-
-
-                        <!-- =================================
-                             PDF OCR + TRANSLATION BUTTON
-                             ================================= -->
-
-                        <label
-                            for="pdfInput"
-                            class="ocr-button"
-                            title="OCR and translate PDF"
-                        >
-
-                            <span class="ocr-icon">
-                                📄
-                            </span>
-
-                            <span>
-                                PDF
-                            </span>
-
-                        </label>
-
-
-                        <input
-                            id="pdfInput"
-                            type="file"
-                            accept="application/pdf,.pdf"
-                            hidden
-                        >
-
-
                     </div>
 
-
-
-                    <!-- =====================================
-                         SOURCE FOOTER RIGHT
-                         ===================================== -->
 
                     <div class="source-footer-right">
 
@@ -372,9 +320,9 @@
 
 
 
-            <!-- =============================================
+            <!-- =========================================
                  TRANSLATION RESULT
-                 ============================================= -->
+                 ========================================= -->
 
             <div
                 class="translation-box result-box"
@@ -418,9 +366,7 @@
 
 
 
-        <!-- =================================================
-             TRANSLATE BUTTON
-             ================================================= -->
+        <!-- TRANSLATE BUTTON -->
 
         <div class="translator-actions">
 
@@ -446,9 +392,7 @@
 
 
 
-        <!-- =================================================
-             ERROR
-             ================================================= -->
+        <!-- ERROR -->
 
         <div
             id="errorMessage"
@@ -466,10 +410,6 @@
 
     <section class="features">
 
-
-        <!-- =============================================
-             FEATURE 1
-             ============================================= -->
 
         <div class="feature-card">
 
@@ -489,11 +429,6 @@
         </div>
 
 
-
-        <!-- =============================================
-             FEATURE 2
-             ============================================= -->
-
         <div class="feature-card">
 
             <div class="feature-icon">
@@ -511,11 +446,6 @@
 
         </div>
 
-
-
-        <!-- =============================================
-             FEATURE 3
-             ============================================= -->
 
         <div class="feature-card">
 
@@ -586,93 +516,9 @@
 ></script>
 
 
-<!-- =====================================================
-     PDF.JS
-     ===================================================== -->
-
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
-></script>
-
-
-<!-- =====================================================
-     JSPDF
-     ===================================================== -->
-
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-></script>
-
-
-<!-- =====================================================
-     LIBRARY CHECK
-     ===================================================== -->
-
-<script>
-    console.log("====================================");
-    console.log("Dhiren Translate library check");
-    console.log("====================================");
-
-    console.log(
-        "Tesseract:",
-        typeof window.Tesseract
-    );
-
-    console.log(
-        "PDF.js:",
-        typeof window.pdfjsLib
-    );
-
-    console.log(
-        "jsPDF window.jspdf:",
-        typeof window.jspdf
-    );
-
-    console.log(
-        "jsPDF constructor:",
-        typeof window.jspdf?.jsPDF
-    );
-
-    if (
-        typeof window.jspdf === "undefined"
-    ) {
-
-        console.error(
-            "❌ jsPDF FAILED TO LOAD"
-        );
-
-    } else if (
-        typeof window.jspdf.jsPDF !== "function"
-    ) {
-
-        console.error(
-            "❌ jsPDF constructor NOT FOUND"
-        );
-
-    } else {
-
-        console.log(
-            "✅ jsPDF loaded successfully"
-        );
-
-    }
-
-    console.log("====================================");
-</script>
-
-
-<!-- =====================================================
-     EXISTING APPLICATION
-     ===================================================== -->
+<!-- APPLICATION -->
 
 <script src="/app.js"></script>
-
-
-<!-- =====================================================
-     PDF OCR + TRANSLATION MODULE
-     ===================================================== -->
-
-<script src="/pdf.js"></script>
 
 
 </body>
